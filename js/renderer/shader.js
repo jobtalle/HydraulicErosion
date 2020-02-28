@@ -23,10 +23,10 @@ const Shader = function(gl, vertex, fragment, uniforms, attributes) {
         console.log(gl.getProgramInfoLog(this.program));
 
     for (const uniform of uniforms)
-        this["u" + uniform.charAt(0).toUpperCase() + uniform.slice(1)] = gl.getUniformLocation(program, uniform);
+        this["u" + uniform.charAt(0).toUpperCase() + uniform.slice(1)] = gl.getUniformLocation(this.program, uniform);
 
     for (const attrib of attributes)
-        this["a" + attrib.charAt(0).toUpperCase() + attrib.slice(1)] = gl.getAttribLocation(program, attrib);
+        this["a" + attrib.charAt(0).toUpperCase() + attrib.slice(1)] = gl.getAttribLocation(this.program, attrib);
 };
 
 Shader.prototype.use = function() {

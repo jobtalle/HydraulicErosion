@@ -3,7 +3,7 @@ const TIME_STEP_MAX = 0.1;
 const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
 const renderer = new Renderer(canvas);
-let bounty = new Bounty();
+let bounty = new Bounty(renderer);
 let lastDate = new Date();
 
 const resize = () => {
@@ -14,6 +14,7 @@ const resize = () => {
 };
 
 const update = timeStep => {
+    bounty.update(timeStep);
     renderer.draw();
 };
 
@@ -29,7 +30,7 @@ const loopFunction = () => {
 window.onresize = resize;
 window.onkeydown = () => {
     bounty.free();
-    bounty = new Bounty();
+    bounty = new Bounty(renderer);
 };
 
 resize();
