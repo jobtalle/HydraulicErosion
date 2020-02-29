@@ -8,10 +8,10 @@
  * @constructor
  */
 const HeightMapParameters = function(
-    octaves = 6,
-    scale = .025,
-    influenceFalloff = 2,
-    scaleFalloff = 1.7,
+    octaves = 8,
+    scale = .15,
+    influenceFalloff = 1.9,
+    scaleFalloff = 1.6,
     amplitude = 10) {
     this.octaves = octaves;
     this.scale = scale;

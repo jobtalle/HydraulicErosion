@@ -6,8 +6,8 @@
  * @constructor
  */
 const TerrainParameters = function(
-    width = 20,
-    height = 20,
+    width = 30,
+    height = 30,
     heightMapParameters = new HeightMapParameters()) {
     this.width = width;
     this.height = height;

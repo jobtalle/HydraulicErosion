@@ -1,8 +1,8 @@
 /**
  * A 3D vector
- * @param {Number} x The X value
- * @param {Number} y The Y value
- * @param {Number} z The Z value
+ * @param {Number} [x] The X value
+ * @param {Number} [y] The Y value
+ * @param {Number} [z] The Z value
  * @constructor
  */
 const Vector = function(x = 0, y = 0, z = 0) {

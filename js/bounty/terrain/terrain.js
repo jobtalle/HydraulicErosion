@@ -11,7 +11,7 @@ const Terrain = function(parameters) {
     console.log("Created terrain");
 };
 
-Terrain.prototype.RESOLUTION = .1;
+Terrain.prototype.RESOLUTION = .15;
 
 /**
  * Create a height map for this terrain
@@ -20,7 +20,8 @@ Terrain.prototype.createHeightMap = function() {
     this.heightMap = new HeightMap(
         this.parameters.heightMapParameters,
         Math.ceil(this.parameters.width / this.RESOLUTION) + 1,
-        Math.ceil(this.parameters.height / this.RESOLUTION) + 1);
+        Math.ceil(this.parameters.height / this.RESOLUTION) + 1,
+        this.RESOLUTION);
 };
 
 /**

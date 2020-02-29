@@ -44,14 +44,46 @@ SystemTerrain.HeightMap.prototype.build = function() {
         vertices[index + 2] = y * this.resolution;
 
         if (x !== this.xValues - 1 && y !== this.yValues - 1) {
-            indices.push(
-                x + y * this.xValues,
-                x + y * this.xValues + 1,
-                x + (y + 1) * this.xValues,
-                x + (y + 1) * this.xValues,
-                x + y * this.xValues + 1,
-                x + (y + 1) * this.xValues + 1);
+            if ((x + (y & 1)) & 1)
+                indices.push(
+                    x + y * this.xValues,
+                    x + y * this.xValues + 1,
+                    x + (y + 1) * this.xValues,
+                    x + (y + 1) * this.xValues,
+                    x + y * this.xValues + 1,
+                    x + (y + 1) * this.xValues + 1);
+            else
+                indices.push(
+                    x + y * this.xValues,
+                    x + y * this.xValues + 1,
+                    x + (y + 1) * this.xValues + 1,
+                    x + (y + 1) * this.xValues + 1,
+                    x + (y + 1) * this.xValues,
+                    x + y * this.xValues);
         }
+    }
+
+    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
+        const index = (x + y * this.xValues) * 6;
+        const normal = new Vector();
+
+        if (x !== 0 && y !== 0 && x !== this.xValues - 1 && y !== this.yValues - 1) {
+            const left = new Vector(-this.resolution, vertices[index - 5] - vertices[index + 1], 0);
+            const top = new Vector(0, vertices[index + 1 - this.xValues * 6] - vertices[index + 1], -this.resolution);
+            const right = new Vector(this.resolution, vertices[index + 7] - vertices[index + 1], 0);
+            const bottom = new Vector(0, vertices[index + 1 + this.xValues * 6] - vertices[index + 1], this.resolution);
+
+            normal.add(left.copy().cross(top));
+            normal.add(top.cross(right));
+            normal.add(right.cross(bottom));
+            normal.add(bottom.cross(left));
+        }
+
+        normal.normalize();
+
+        vertices[index + 3] = normal.x;
+        vertices[index + 4] = normal.y;
+        vertices[index + 5] = normal.z;
     }
 
     this.indexCount = indices.length;

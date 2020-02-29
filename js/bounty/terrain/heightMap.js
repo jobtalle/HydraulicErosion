@@ -3,12 +3,14 @@
  * @param {HeightMapParameters} parameters Height map parameters
  * @param {Number} xValues The amount of X values to generate
  * @param {Number} yValues The amount of Y values to generate
+ * @param {Number} resolution The terrain resolution
  * @constructor
  */
-const HeightMap = function(parameters, xValues, yValues) {
+const HeightMap = function(parameters, xValues, yValues, resolution) {
     this.parameters = parameters;
     this.xValues = xValues;
     this.yValues = yValues;
+    this.resolution = resolution;
     this.values = new Array(xValues * yValues);
 
     this.generate();
@@ -60,7 +62,7 @@ HeightMap.prototype.generate = function() {
     const influences = this.makeInfluences(this.parameters.octaves, this.parameters.influenceFalloff);
 
     for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
-        let scale = this.parameters.scale;
+        let scale = this.parameters.scale * this.resolution;
         let height = 0;
 
         for (let octave = 0; octave < this.parameters.octaves; ++octave) {
@@ -70,6 +72,6 @@ HeightMap.prototype.generate = function() {
                 scale *= this.parameters.scaleFalloff;
         }
 
-        this.values[x + y * this.xValues] = height * this.parameters.amplitude;
+        this.values[x + y * this.xValues] = (height ** 4) * this.parameters.amplitude * 2;
     }
 };
