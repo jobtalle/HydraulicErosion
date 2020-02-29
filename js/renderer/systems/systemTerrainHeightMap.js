@@ -8,5 +8,5 @@ SystemTerrain.HeightMap.prototype.draw = function() {
 };
 
 SystemTerrain.HeightMap.prototype.free = function() {
-
+    this.container.splice(this.container.indexOf(this), 1);
 };
