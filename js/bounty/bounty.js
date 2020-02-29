@@ -17,14 +17,14 @@ const Bounty = function(renderer) {
 };
 
 Bounty.prototype.update = function(timeStep) {
-    this.angle += timeStep;
+    this.angle += timeStep * .2;
 
-    const r = 14;
+    const r = 25;
 
     this.renderer.view(
         new Vector(
             Math.cos(this.angle) * r,
-            r,
+            .5 * r,
             Math.sin(this.angle) * r
         ),
         new Vector());

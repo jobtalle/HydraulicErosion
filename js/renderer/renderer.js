@@ -1,6 +1,7 @@
 const Renderer = function(canvas) {
     this.gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     this.systemGeometry = new SystemGeometry(this.gl);
+    this.systemTerrain = new SystemTerrain(this.gl);
     this.matrixBuffer = new Array(16);
     this.matrixProjection = new Matrix();
     this.matrixModelView = new Matrix();
@@ -25,6 +26,7 @@ Renderer.prototype.draw = function() {
     this.gl.viewport(0, 0, this.width, this.height);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
+    this.systemTerrain.draw(this.matrixBuffer);
     this.systemGeometry.draw(this.matrixBuffer);
 };
 
