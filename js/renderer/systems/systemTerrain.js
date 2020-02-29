@@ -11,7 +11,7 @@ const SystemTerrain = function(gl) {
         this.SHADER_VERTEX,
         this.SHADER_FRAGMENT,
         ["mvp"],
-        ["vertex"]);
+        ["vertex", "normal"]);
 };
 
 SystemTerrain.prototype.SHADER_VERTEX = `
@@ -20,8 +20,12 @@ SystemTerrain.prototype.SHADER_VERTEX = `
 uniform mat4 mvp;
 
 attribute mediump vec3 vertex;
+attribute mediump vec3 normal;
+
+varying mediump vec3 iNormal;
 
 void main() {
+  iNormal = normal;
   gl_Position = mvp * vec4(vertex, 1.0);
 }
 `;
@@ -29,8 +33,10 @@ void main() {
 SystemTerrain.prototype.SHADER_FRAGMENT = `
 #version 100
 
+varying mediump vec3 iNormal;
+
 void main() {
-  gl_FragColor = vec4(1.0, 0.5, 0.3, 1.0);
+  gl_FragColor = vec4(normalize(iNormal), 1.0);
 }
 `;
 
@@ -58,9 +64,6 @@ SystemTerrain.prototype.draw = function(mvp) {
     this.shader.use();
     this.gl.uniformMatrix4fv(this.shader.uMvp, false, mvp);
 
-    this.gl.enableVertexAttribArray(this.shader.aVertex);
-    this.gl.vertexAttribPointer(this.shader.aVertex, 3, this.gl.FLOAT, false, 0, 0);
-
     for (const heightMap of this.heightMaps)
-        heightMap.draw(mvp);
+        heightMap.draw(this.shader);
 };

@@ -11,6 +11,7 @@ const Bounty = function(parameters, renderer) {
     this.terrain = null;
     this.genQueue = [
         () => this.terrain = new Terrain(parameters.terrainParameters),
+        () => this.terrain.createHeightMap(),
         () => this.terrain.createModel(renderer)
     ];
 };

@@ -33,15 +33,15 @@ SystemTerrain.HeightMap = function(
  * Build the height map data & upload it to the buffers
  */
 SystemTerrain.HeightMap.prototype.build = function() {
-    const vertices = new Array(this.values.length * 3);
+    const vertices = new Array(this.values.length * 6);
     const indices = [];
 
     for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
-        const index = x + y * this.xValues;
+        const index = (x + y * this.xValues) * 6;
 
-        vertices[3 * index] = x * this.resolution;
-        vertices[3 * index + 1] = this.values[x + y * this.xValues];
-        vertices[3 * index + 2] = y * this.resolution;
+        vertices[index] = x * this.resolution;
+        vertices[index + 1] = this.values[x + y * this.xValues];
+        vertices[index + 2] = y * this.resolution;
 
         if (x !== this.xValues - 1 && y !== this.yValues - 1) {
             indices.push(
@@ -63,10 +63,17 @@ SystemTerrain.HeightMap.prototype.build = function() {
 
 /**
  * Draw this height map
+ * @param {Shader} shader The active shader
  */
-SystemTerrain.HeightMap.prototype.draw = function() {
+SystemTerrain.HeightMap.prototype.draw = function(shader) {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertices);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
+
+    this.gl.enableVertexAttribArray(shader.aVertex);
+    this.gl.vertexAttribPointer(shader.aVertex, 3, this.gl.FLOAT, false, 24, 0);
+    this.gl.enableVertexAttribArray(shader.aNormal);
+    this.gl.vertexAttribPointer(shader.aNormal, 3, this.gl.FLOAT, false, 24, 12);
+
     this.gl.drawElements(this.gl.TRIANGLES, this.indexCount, this.gl.UNSIGNED_SHORT, 0);
 };
 

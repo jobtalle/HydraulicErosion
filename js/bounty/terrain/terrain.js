@@ -6,15 +6,22 @@
 const Terrain = function(parameters) {
     this.parameters = parameters;
     this.model = null;
-    this.heightMap = new HeightMap(
-        parameters.heightMapParameters,
-        Math.ceil(parameters.width / this.RESOLUTION) + 1,
-        Math.ceil(parameters.height / this.RESOLUTION) + 1);
+    this.heightMap = null;
 
     console.log("Created terrain");
 };
 
 Terrain.prototype.RESOLUTION = .1;
+
+/**
+ * Create a height map for this terrain
+ */
+Terrain.prototype.createHeightMap = function() {
+    this.heightMap = new HeightMap(
+        this.parameters.heightMapParameters,
+        Math.ceil(this.parameters.width / this.RESOLUTION) + 1,
+        Math.ceil(this.parameters.height / this.RESOLUTION) + 1);
+};
 
 /**
  * Create a terrain model and add it to the rendered scene
