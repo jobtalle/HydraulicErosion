@@ -1,3 +1,8 @@
+/**
+ * The geometry renderer
+ * @param {WebGLRenderingContext} gl The WebGL 1 context
+ * @constructor
+ */
 const SystemGeometry = function(gl) {
     this.gl = gl;
     this.meshes = [];
@@ -29,14 +34,20 @@ void main() {
 }
 `;
 
+/**
+ * Make a mesh
+ * @param {Array} vertices The mesh vertex data
+ * @param {Array} indices The mesh indices
+ * @returns {SystemGeometry.Mesh} The mesh
+ */
 SystemGeometry.prototype.makeMesh = function(vertices, indices) {
-    const mesh = new SystemGeometry.Mesh(this.meshes, this.gl, vertices, indices);
-
-    this.meshes.push(mesh);
-
-    return mesh;
+    return new SystemGeometry.Mesh(this.meshes, this.gl, vertices, indices);
 };
 
+/**
+ * Draw all geometry
+ * @param {Array} mvp An array containing the values of the MVP matrix
+ */
 SystemGeometry.prototype.draw = function(mvp) {
     this.shader.use();
     this.gl.uniformMatrix4fv(this.shader.uMvp, false, mvp);

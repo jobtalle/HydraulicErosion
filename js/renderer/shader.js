@@ -1,3 +1,12 @@
+/**
+ * A shader
+ * @param {Object} gl A WebGL 1 context
+ * @param {String} vertex The vertex shader
+ * @param {String} fragment The fragment shader
+ * @param {Array} uniforms An array of uniform names
+ * @param {Array} attributes An array of attribute names
+ * @constructor
+ */
 const Shader = function(gl, vertex, fragment, uniforms, attributes) {
     const shaderVertex = gl.createShader(gl.VERTEX_SHADER);
     const shaderFragment = gl.createShader(gl.FRAGMENT_SHADER);
@@ -29,10 +38,16 @@ const Shader = function(gl, vertex, fragment, uniforms, attributes) {
         this["a" + attrib.charAt(0).toUpperCase() + attrib.slice(1)] = gl.getAttribLocation(this.program, attrib);
 };
 
+/**
+ * Make this shader program active
+ */
 Shader.prototype.use = function() {
     this.gl.useProgram(this.program);
 };
 
+/**
+ * Free the shader
+ */
 Shader.prototype.free = function() {
     this.gl.deleteProgram(this.program);
 };

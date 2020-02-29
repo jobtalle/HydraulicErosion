@@ -1,9 +1,16 @@
-const Bounty = function(renderer) {
+/**
+ * An island scene
+ * @param {BountyParameters} parameters The parameters that govern how the scene is generated
+ * @param {Renderer} renderer The renderer
+ * @constructor
+ */
+const Bounty = function(parameters, renderer) {
     this.renderer = renderer;
     this.angle = 0;
     this.terrain = null;
     this.genQueue = [
-        () => this.terrain = new Terrain()
+        () => this.terrain = new Terrain(parameters.terrainParameters),
+        () => this.terrain.createModel(renderer)
     ];
 
     this.heightmap = renderer.systemGeometry.makeMesh(
@@ -18,6 +25,10 @@ const Bounty = function(renderer) {
 
 Bounty.prototype.GEN_TIME_MAX = 1 / 60;
 
+/**
+ * Execute the functions in the generation queue
+ * @param {Number} time The maximum amount of time that may be used in seconds
+ */
 Bounty.prototype.generate = function(time) {
     const startTime = new Date();
 
@@ -25,6 +36,10 @@ Bounty.prototype.generate = function(time) {
         this.genQueue.shift()();
 };
 
+/**
+ * Update the scene, or generate it if it is not ready
+ * @param {Number} timeStep The amount of elapsed time since the previous update in seconds
+ */
 Bounty.prototype.update = function(timeStep) {
     if (this.genQueue.length !== 0) {
         this.generate(Bounty.prototype.GEN_TIME_MAX);
@@ -45,6 +60,9 @@ Bounty.prototype.update = function(timeStep) {
         new Vector());
 };
 
+/**
+ * Free the scene
+ */
 Bounty.prototype.free = function() {
     if (this.terrain)
         this.terrain.free();

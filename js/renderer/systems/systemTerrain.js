@@ -1,3 +1,8 @@
+/**
+ * The terrain renderer
+ * @param {WebGLRenderingContext} gl The WebGL 1 context
+ * @constructor
+ */
 const SystemTerrain = function(gl) {
     this.gl = gl;
     this.heightMaps = [];
@@ -29,14 +34,20 @@ void main() {
 }
 `;
 
+/**
+ * Make a height map
+ * @param {Number} width The terrain width
+ * @param {Number} height The terrain height
+ * @returns {SystemTerrain.HeightMap} The terrain object
+ */
 SystemTerrain.prototype.makeHeightMap = function(width, height) {
-    const heightMap = new SystemTerrain.HeightMap(this.heightMaps, this.gl, width, height);
-
-    this.heightMaps.push(heightMap);
-
-    return heightMap;
+    return new SystemTerrain.HeightMap(this.heightMaps, this.gl, width, height, []);
 };
 
+/**
+ * Draw all terrain
+ * @param {Array} mvp An array containing the values of the MVP matrix
+ */
 SystemTerrain.prototype.draw = function(mvp) {
     this.shader.use();
     this.gl.uniformMatrix4fv(this.shader.uMvp, false, mvp);

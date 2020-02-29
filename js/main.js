@@ -3,9 +3,13 @@ const TIME_STEP_MAX = 0.1;
 const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
 const renderer = new Renderer(canvas);
-let bounty = new Bounty(renderer);
+const parameters = new BountyParameters();
+let bounty = new Bounty(parameters, renderer);
 let lastDate = new Date();
 
+/**
+ * Resize the canvas
+ */
 const resize = () => {
     canvas.width = wrapper.offsetWidth;
     canvas.height = wrapper.offsetHeight;
@@ -13,11 +17,18 @@ const resize = () => {
     renderer.resize(canvas.width, canvas.height);
 };
 
+/**
+ * To be called on each frame refresh
+ * @param {Number} timeStep Passed time in seconds
+ */
 const update = timeStep => {
     bounty.update(timeStep);
     renderer.draw();
 };
 
+/**
+ * A function called on each animation frame
+ */
 const loopFunction = () => {
     const date = new Date();
 
@@ -30,7 +41,7 @@ const loopFunction = () => {
 window.onresize = resize;
 window.onkeydown = () => {
     bounty.free();
-    bounty = new Bounty(renderer);
+    bounty = new Bounty(parameters, renderer);
 };
 
 resize();
