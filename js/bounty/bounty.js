@@ -5,6 +5,7 @@
  * @constructor
  */
 const Bounty = function(parameters, renderer) {
+    this.parameters = parameters;
     this.renderer = renderer;
     this.angle = 0;
     this.terrain = null;
@@ -12,15 +13,6 @@ const Bounty = function(parameters, renderer) {
         () => this.terrain = new Terrain(parameters.terrainParameters),
         () => this.terrain.createModel(renderer)
     ];
-
-    this.heightmap = renderer.systemGeometry.makeMesh(
-        [
-            -10, 0, -10,
-            -10, 0, 10,
-            10, 0, 10,
-            10, 0, -10
-        ],
-        [0, 3, 2, 2, 1, 0]);
 };
 
 Bounty.prototype.GEN_TIME_MAX = 1 / 60;
@@ -50,14 +42,16 @@ Bounty.prototype.update = function(timeStep) {
     this.angle += timeStep * .2;
 
     const r = 25;
+    const cx = this.parameters.terrainParameters.width * .5;
+    const cy = this.parameters.terrainParameters.height * .5;
 
     this.renderer.view(
         new Vector(
-            Math.cos(this.angle) * r,
+            cx + Math.cos(this.angle) * r,
             .5 * r,
-            Math.sin(this.angle) * r
+            cy + Math.sin(this.angle) * r
         ),
-        new Vector());
+        new Vector(cx, 0, cy));
 };
 
 /**
@@ -66,6 +60,4 @@ Bounty.prototype.update = function(timeStep) {
 Bounty.prototype.free = function() {
     if (this.terrain)
         this.terrain.free();
-
-    this.heightmap.free();
 };

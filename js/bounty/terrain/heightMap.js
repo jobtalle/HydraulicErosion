@@ -10,6 +10,7 @@ const HeightMap = function(parameters, xValues, yValues) {
     this.xValues = xValues;
     this.yValues = yValues;
     this.values = new Array(xValues * yValues);
+
     this.generate();
 };
 
@@ -22,14 +23,33 @@ HeightMap.prototype.createNoises = function() {
     let scale = this.parameters.scale;
 
     for (let octave = 0; octave < this.parameters.octaves; ++octave) {
-        noises.push(new CubicNoise(
+        noises[octave] = new CubicNoise(
             Math.ceil(scale * this.xValues),
-            Math.ceil(scale * this.yValues)));
+            Math.ceil(scale * this.yValues));
 
-        scale *= this.parameters.falloff;
+        scale *= this.parameters.scaleFalloff;
     }
 
     return noises;
+};
+
+/**
+ * Make a number of octave influences summing up to 1
+ * @param {Number} octaves The number of octaves
+ * @param {Number} falloff The influence falloff per octave
+ */
+HeightMap.prototype.makeInfluences = function(octaves, falloff) {
+    const influences = new Array(octaves);
+    let influence = ((falloff - 1) * (falloff ** octaves)) / (falloff ** octaves - 1) / falloff;
+
+    for (let octave = 0; octave < octaves; ++octave) {
+        influences[octave] = influence;
+
+        if (octave !== octaves - 1)
+            influence /= falloff;
+    }
+
+    return influences;
 };
 
 /**
@@ -37,4 +57,19 @@ HeightMap.prototype.createNoises = function() {
  */
 HeightMap.prototype.generate = function() {
     const noises = this.createNoises();
+    const influences = this.makeInfluences(this.parameters.octaves, this.parameters.influenceFalloff);
+
+    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
+        let scale = this.parameters.scale;
+        let height = 0;
+
+        for (let octave = 0; octave < this.parameters.octaves; ++octave) {
+            height += noises[octave].sample(x * scale, y * scale) * influences[octave];
+
+            if (octave !== this.parameters.octaves - 1)
+                scale *= this.parameters.scaleFalloff;
+        }
+
+        this.values[x + y * this.xValues] = height * this.parameters.amplitude;
+    }
 };

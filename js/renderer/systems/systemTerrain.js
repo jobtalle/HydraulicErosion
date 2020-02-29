@@ -36,12 +36,18 @@ void main() {
 
 /**
  * Make a height map
- * @param {Number} width The terrain width
- * @param {Number} height The terrain height
+ * @param {Number} xValues The number of X values
+ * @param {Number} yValues The number of Y values
+ * @param {Array} values An array containing all height values
+ * @param {Number} resolution The spacing between the values
  * @returns {SystemTerrain.HeightMap} The terrain object
  */
-SystemTerrain.prototype.makeHeightMap = function(width, height) {
-    return new SystemTerrain.HeightMap(this.heightMaps, this.gl, width, height, []);
+SystemTerrain.prototype.makeHeightMap = function(
+    xValues,
+    yValues,
+    values,
+    resolution) {
+    return new SystemTerrain.HeightMap(this.heightMaps, this.gl, xValues, yValues, values, resolution);
 };
 
 /**
@@ -54,4 +60,7 @@ SystemTerrain.prototype.draw = function(mvp) {
 
     this.gl.enableVertexAttribArray(this.shader.aVertex);
     this.gl.vertexAttribPointer(this.shader.aVertex, 3, this.gl.FLOAT, false, 0, 0);
+
+    for (const heightMap of this.heightMaps)
+        heightMap.draw(mvp);
 };
