@@ -5,7 +5,7 @@
  * @constructor
  */
 const BountyParameters = function(
-    seed = Math.floor(Math.random() * 0xFFFF),
+    seed = Math.floor(Math.random() * 0xFFFFFFFF),
     terrainParameters = new TerrainParameters()) {
     this.seed = seed;
     this.terrainParameters = terrainParameters;

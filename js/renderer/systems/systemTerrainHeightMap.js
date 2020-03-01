@@ -66,7 +66,7 @@ SystemTerrain.HeightMap.prototype.calculateNormals = function(
                 0);
 
             if (bottom)
-                normal.add(bottom.copy().cross(left));
+                normal.add(bottom.cross(left));
 
             if (top)
                 normal.add(left.cross(top));

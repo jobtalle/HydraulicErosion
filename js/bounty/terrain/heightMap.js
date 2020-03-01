@@ -4,6 +4,7 @@
  * @param {Number} xValues The amount of X values to generate
  * @param {Number} yValues The amount of Y values to generate
  * @param {Number} resolution The terrain resolution
+ * @param {Object} shape A terrain shape
  * @param {Random} random A randomizer
  * @constructor
  */
@@ -12,11 +13,13 @@ const HeightMap = function(
     xValues,
     yValues,
     resolution,
+    shape,
     random) {
     this.parameters = parameters;
     this.xValues = xValues;
     this.yValues = yValues;
     this.resolution = resolution;
+    this.shape = shape;
     this.random = random;
     this.values = new Array(xValues * yValues);
 
@@ -81,6 +84,9 @@ HeightMap.prototype.generate = function() {
                 scale *= this.parameters.scaleFalloff;
         }
 
-        this.values[x + y * this.xValues] = (height ** this.parameters.heightPower) * this.parameters.amplitude;
+        this.values[x + y * this.xValues] =
+            (height ** this.parameters.heightPower) *
+            this.parameters.amplitude *
+            this.shape.sample(x * this.resolution, y * this.resolution);
     }
 };

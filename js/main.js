@@ -41,7 +41,7 @@ const loopFunction = () => {
 window.onresize = resize;
 window.onkeydown = () => {
     bounty.free();
-    parameters.seed = Math.floor(Math.random() * 0xFFFF);
+    parameters.seed = Math.floor(Math.random() * 0xFFFFFFFF);
     bounty = new Bounty(parameters, renderer);
 };
 

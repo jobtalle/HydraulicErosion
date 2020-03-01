@@ -16,6 +16,18 @@ const Terrain = function(parameters, random) {
 Terrain.prototype.RESOLUTION = .15;
 
 /**
+ * Created a height mask shape based on the terrain parameters
+ * @returns {Object} One of the valid height mask shapes
+ */
+Terrain.prototype.createShape = function() {
+    switch (this.parameters.shape) {
+        default:
+        case TerrainParameters.SHAPE_CONE:
+            return new ShapeCone(this.parameters.width, this.parameters.height, this.parameters.shapePower, this.random);
+    }
+};
+
+/**
  * Create a height map for this terrain
  */
 Terrain.prototype.createHeightMap = function() {
@@ -24,6 +36,7 @@ Terrain.prototype.createHeightMap = function() {
         Math.ceil(this.parameters.width / this.RESOLUTION) + 1,
         Math.ceil(this.parameters.height / this.RESOLUTION) + 1,
         this.RESOLUTION,
+        this.createShape(),
         this.random);
 };
 

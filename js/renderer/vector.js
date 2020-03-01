@@ -19,6 +19,11 @@ Vector.prototype.copy = function() {
     return new Vector(this.x, this.y, this.z);
 };
 
+/**
+ * Set this vectors contents equal to those of another vector
+ * @param {Vector} other A vector
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.set = function(other) {
     this.x = other.x;
     this.y = other.y;
@@ -27,6 +32,10 @@ Vector.prototype.set = function(other) {
     return this;
 };
 
+/**
+ * Negate this vector
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.negate = function() {
     this.x = -this.x;
     this.y = -this.y;
@@ -35,6 +44,11 @@ Vector.prototype.negate = function() {
     return this;
 };
 
+/**
+ * Add a vector to this vector
+ * @param {Vector} other A vector
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.add = function(other) {
     this.x += other.x;
     this.y += other.y;
@@ -43,6 +57,11 @@ Vector.prototype.add = function(other) {
     return this;
 };
 
+/**
+ * Subtract a vector from this vector
+ * @param {Vector} other A vector
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.subtract = function(other) {
     this.x -= other.x;
     this.y -= other.y;
@@ -51,6 +70,11 @@ Vector.prototype.subtract = function(other) {
     return this;
 };
 
+/**
+ * Multiply this vector by a scalar
+ * @param {Number} scalar A number
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.multiply = function(scalar) {
     this.x *= scalar;
     this.y *= scalar;
@@ -59,22 +83,45 @@ Vector.prototype.multiply = function(scalar) {
     return this;
 };
 
+/**
+ * Divide this vector by a scalar
+ * @param {Number} scalar A number
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.divide = function(scalar) {
     return this.multiply(1 / scalar);
 };
 
+/**
+ * Get the dot product of this vector and another vector
+ * @param {Vector} other A vector
+ * @returns {Number} The dot product
+ */
 Vector.prototype.dot = function(other) {
     return this.x * other.x + this.y * other.y + this.z * other.z;
 };
 
+/**
+ * Calculate the length of this vector
+ * @returns {Number} The length of this vector
+ */
 Vector.prototype.length = function() {
     return Math.sqrt(this.dot(this));
 };
 
+/**
+ * Normalize this vector
+ * @returns {Vector} The modified vector
+ */
 Vector.prototype.normalize = function() {
     return this.divide(this.length());
 };
 
+/**
+ * Get the cross product of this vector and another vector
+ * @param {Vector} other A vector
+ * @returns {Vector} The cross product of this vector and the other vector
+ */
 Vector.prototype.cross = function(other) {
     return new Vector(
         this.y * other.z - other.y * this.z,
@@ -82,6 +129,10 @@ Vector.prototype.cross = function(other) {
         this.x * other.y - other.x * this.y);
 };
 
+/**
+ * Write the contents of this vector to an array
+ * @param {Array} array The array to write this vectors values to
+ */
 Vector.prototype.toArray = function(array) {
     array[0] = this.x;
     array[1] = this.y;

@@ -43,7 +43,7 @@ Bounty.prototype.update = function(timeStep) {
 
     this.angle += timeStep * .2;
 
-    const r = 20;
+    const r = 25;
     const cx = this.parameters.terrainParameters.width * .5;
     const cy = this.parameters.terrainParameters.height * .5;
 

@@ -10,10 +10,10 @@
  */
 const HeightMapParameters = function(
     octaves = 8,
-    scale = .14,
-    influenceFalloff = .52,
+    scale = .12,
+    influenceFalloff = .54,
     scaleFalloff = 1.6,
-    amplitude = 35,
+    amplitude = 45,
     heightPower = 5) {
     this.octaves = octaves;
     this.scale = scale;
