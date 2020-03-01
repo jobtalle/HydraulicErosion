@@ -1,9 +1,11 @@
 /**
  * A terrain
  * @param {TerrainParameters} parameters The terrain parameters
+ * @param {Random} random A randomizer
  * @constructor
  */
-const Terrain = function(parameters) {
+const Terrain = function(parameters, random) {
+    this.random = random;
     this.parameters = parameters;
     this.model = null;
     this.heightMap = null;
@@ -21,7 +23,8 @@ Terrain.prototype.createHeightMap = function() {
         this.parameters.heightMapParameters,
         Math.ceil(this.parameters.width / this.RESOLUTION) + 1,
         Math.ceil(this.parameters.height / this.RESOLUTION) + 1,
-        this.RESOLUTION);
+        this.RESOLUTION,
+        this.random);
 };
 
 /**

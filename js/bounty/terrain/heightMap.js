@@ -4,13 +4,20 @@
  * @param {Number} xValues The amount of X values to generate
  * @param {Number} yValues The amount of Y values to generate
  * @param {Number} resolution The terrain resolution
+ * @param {Random} random A randomizer
  * @constructor
  */
-const HeightMap = function(parameters, xValues, yValues, resolution) {
+const HeightMap = function(
+    parameters,
+    xValues,
+    yValues,
+    resolution,
+    random) {
     this.parameters = parameters;
     this.xValues = xValues;
     this.yValues = yValues;
     this.resolution = resolution;
+    this.random = random;
     this.values = new Array(xValues * yValues);
 
     this.generate();
@@ -27,7 +34,8 @@ HeightMap.prototype.createNoises = function() {
     for (let octave = 0; octave < this.parameters.octaves; ++octave) {
         noises[octave] = new CubicNoise(
             Math.ceil(scale * this.xValues),
-            Math.ceil(scale * this.yValues));
+            Math.ceil(scale * this.yValues),
+            this.random);
 
         scale *= this.parameters.scaleFalloff;
     }
@@ -42,13 +50,14 @@ HeightMap.prototype.createNoises = function() {
  */
 HeightMap.prototype.makeInfluences = function(octaves, falloff) {
     const influences = new Array(octaves);
-    let influence = ((falloff - 1) * (falloff ** octaves)) / (falloff ** octaves - 1) / falloff;
+    const iFalloff = 1 / falloff;
+    let influence = ((iFalloff - 1) * (iFalloff ** octaves)) / (iFalloff ** octaves - 1) / iFalloff;
 
     for (let octave = 0; octave < octaves; ++octave) {
         influences[octave] = influence;
 
         if (octave !== octaves - 1)
-            influence /= falloff;
+            influence *= falloff;
     }
 
     return influences;
@@ -72,6 +81,6 @@ HeightMap.prototype.generate = function() {
                 scale *= this.parameters.scaleFalloff;
         }
 
-        this.values[x + y * this.xValues] = (height ** 4) * this.parameters.amplitude * 2;
+        this.values[x + y * this.xValues] = (height ** 5) * this.parameters.amplitude * 3;
     }
 };

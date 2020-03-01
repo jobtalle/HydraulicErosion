@@ -2,14 +2,15 @@
  * A cubic noise
  * @param {Number} width The width of the range that can be sampled
  * @param {Number} height The height of the range that can be sampled
+ * @param {Random} randomizer A randomizer
  * @constructor
  */
-const CubicNoise = function(width, height) {
+const CubicNoise = function(width, height, randomizer) {
     this.width = width;
     this.values = new Array((width + 2) * (height + 2));
 
     for (let i = 0; i < this.values.length; ++i)
-        this.values[i] = Math.random();
+        this.values[i] = randomizer.getFloat();
 };
 
 /**

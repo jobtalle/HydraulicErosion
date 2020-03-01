@@ -5,12 +5,13 @@
  * @constructor
  */
 const Bounty = function(parameters, renderer) {
+    this.random = new Random(parameters.seed);
     this.parameters = parameters;
     this.renderer = renderer;
     this.angle = 0;
     this.terrain = null;
     this.genQueue = [
-        () => this.terrain = new Terrain(parameters.terrainParameters),
+        () => this.terrain = new Terrain(parameters.terrainParameters, this.random),
         () => this.terrain.createHeightMap(),
         () => this.terrain.createModel(renderer)
     ];

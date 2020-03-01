@@ -46,12 +46,12 @@ SystemTerrain.HeightMap.prototype.build = function() {
         if (x !== this.xValues - 1 && y !== this.yValues - 1) {
             if ((x + (y & 1)) & 1)
                 indices.push(
+                    x + (y + 1) * this.xValues,
                     x + y * this.xValues,
                     x + y * this.xValues + 1,
-                    x + (y + 1) * this.xValues,
-                    x + (y + 1) * this.xValues,
                     x + y * this.xValues + 1,
-                    x + (y + 1) * this.xValues + 1);
+                    x + (y + 1) * this.xValues + 1,
+                    x + (y + 1) * this.xValues);
             else
                 indices.push(
                     x + y * this.xValues,
