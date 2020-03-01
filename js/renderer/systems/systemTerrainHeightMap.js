@@ -66,17 +66,34 @@ SystemTerrain.HeightMap.prototype.build = function() {
     for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
         const index = (x + y * this.xValues) * 6;
         const normal = new Vector();
+        let top = null;
+        let bottom = null;
 
-        if (x !== 0 && y !== 0 && x !== this.xValues - 1 && y !== this.yValues - 1) {
+        if (y !== 0)
+            top = new Vector(0, vertices[index + 1 - this.xValues * 6] - vertices[index + 1], -this.resolution);
+
+        if (y !== this.yValues - 1)
+            bottom = new Vector(0, vertices[index + 1 + this.xValues * 6] - vertices[index + 1], this.resolution);
+
+        if (x !== 0) {
             const left = new Vector(-this.resolution, vertices[index - 5] - vertices[index + 1], 0);
-            const top = new Vector(0, vertices[index + 1 - this.xValues * 6] - vertices[index + 1], -this.resolution);
-            const right = new Vector(this.resolution, vertices[index + 7] - vertices[index + 1], 0);
-            const bottom = new Vector(0, vertices[index + 1 + this.xValues * 6] - vertices[index + 1], this.resolution);
 
-            normal.add(left.copy().cross(top));
-            normal.add(top.cross(right));
-            normal.add(right.cross(bottom));
-            normal.add(bottom.cross(left));
+            if (bottom)
+                normal.add(bottom.copy().cross(left));
+
+            if (top)
+                normal.add(left.cross(top));
+        }
+
+
+        if (x !== this.xValues - 1) {
+            const right = new Vector(this.resolution, vertices[index + 7] - vertices[index + 1], 0);
+
+            if (top)
+                normal.add(top.cross(right));
+
+            if (bottom)
+                normal.add(right.cross(bottom));
         }
 
         normal.normalize();

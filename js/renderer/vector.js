@@ -11,6 +11,10 @@ const Vector = function(x = 0, y = 0, z = 0) {
     this.z = z;
 };
 
+/**
+ * Copy this vector
+ * @returns {Vector} A copy of the vector
+ */
 Vector.prototype.copy = function() {
     return new Vector(this.x, this.y, this.z);
 };

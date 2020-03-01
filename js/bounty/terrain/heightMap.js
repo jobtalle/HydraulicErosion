@@ -81,6 +81,6 @@ HeightMap.prototype.generate = function() {
                 scale *= this.parameters.scaleFalloff;
         }
 
-        this.values[x + y * this.xValues] = (height ** 5) * this.parameters.amplitude * 3;
+        this.values[x + y * this.xValues] = (height ** 5) * this.parameters.amplitude * 4;
     }
 };
