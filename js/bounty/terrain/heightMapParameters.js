@@ -5,6 +5,7 @@
  * @param {Number} [influenceFalloff] The rate of amplitude change for successive noises
  * @param {Number} [scaleFalloff] The rate of scale change for successive noises
  * @param {Number} [amplitude] The amplitude of the height map
+ * @param {Number} [heightPower] A power to apply to the height values
  * @constructor
  */
 const HeightMapParameters = function(
@@ -12,10 +13,12 @@ const HeightMapParameters = function(
     scale = .14,
     influenceFalloff = .52,
     scaleFalloff = 1.6,
-    amplitude = 10) {
+    amplitude = 35,
+    heightPower = 5) {
     this.octaves = octaves;
     this.scale = scale;
     this.influenceFalloff = influenceFalloff;
     this.scaleFalloff = scaleFalloff;
     this.amplitude = amplitude;
+    this.heightPower = heightPower;
 };
