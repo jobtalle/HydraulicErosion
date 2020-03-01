@@ -27,6 +27,10 @@ Terrain.prototype.createShape = function() {
     }
 };
 
+Terrain.prototype.erode = function() {
+    new Erosion(this.parameters.erosionParameters, this.RESOLUTION, this.random).apply(this.heightMap);
+};
+
 /**
  * Create a height map for this terrain
  */

@@ -90,3 +90,72 @@ HeightMap.prototype.generate = function() {
             this.shape.sample(x * this.resolution, y * this.resolution);
     }
 };
+
+/**
+ * Sample terrain height
+ * @param {Number} x The X coordinate
+ * @param {Number} y The Y coordinate
+ * @returns {Number} The height at this point
+ */
+HeightMap.prototype.sampleHeight = function(x, y) {
+    if (x < 0 || y < 0)
+        return 0;
+
+    x /= this.resolution;
+    y /= this.resolution;
+
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+
+    if (xi >= this.xValues - 1 || yi >= this.yValues - 1)
+        return 0;
+
+    const fx = x - xi;
+    const fy = y - yi;
+    const ylu = this.values[xi + yi * this.xValues];
+    const yld = this.values[xi + (yi + 1) * this.xValues];
+    const yru = this.values[xi + 1 + yi * this.xValues];
+    const yrd = this.values[xi + 1 + (yi + 1) * this.xValues];
+    const yl = ylu + (yld - ylu) * fy;
+    const yr = yru + (yrd - yru) * fy;
+
+    return yl + (yr - yl) * fx;
+};
+
+/**
+ * Sample the terrain normal
+ * @param {Number} x The X coordinate
+ * @param {Number} y The Y coordinate
+ * @returns {Vector} The surface normal vector at this point
+ */
+HeightMap.prototype.sampleNormal = function(x, y) {
+
+};
+
+/**
+ * Change the height at a certain point
+ * @param {Number} x The X coordinate
+ * @param {Number} y The Y coordinate
+ * @param {Number} amount The amount of change
+ */
+HeightMap.prototype.change = function(x, y, amount) {
+    if (x < 0 || y < 0)
+        return;
+
+    x /= this.resolution;
+    y /= this.resolution;
+
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+
+    if (xi >= this.xValues - 1 || yi >= this.yValues - 1)
+        return;
+
+    const fx = x - xi;
+    const fy = y - yi;
+
+    this.values[xi + yi * this.xValues] += fx * fy * amount;
+    this.values[xi + 1 + yi * this.xValues] += (1 - fx) * (1 - fy) * amount;
+    this.values[xi + (yi + 1) * this.xValues] += fx * fy * amount;
+    this.values[xi + 1 + (yi + 1) * this.xValues] += (1 - fx) * (1 - fy) * amount;
+};
