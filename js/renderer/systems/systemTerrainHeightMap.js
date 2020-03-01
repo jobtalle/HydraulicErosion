@@ -30,6 +30,71 @@ SystemTerrain.HeightMap = function(
 };
 
 /**
+ * Calculate the normals for a set of terrain vertices
+ * @param {Array} vertices The vertex buffer
+ * @param {Number} vertexOffset The index offset of vertex coordinates
+ * @param {Number} normalOffset The index offset to write the normals to
+ * @param {Number} stride The vertex data stride
+ */
+SystemTerrain.HeightMap.prototype.calculateNormals = function(
+    vertices,
+    vertexOffset,
+    normalOffset,
+    stride) {
+    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
+        const index = (x + y * this.xValues) * stride;
+        const normal = new Vector();
+        let top = null;
+        let bottom = null;
+
+        if (y !== 0)
+            top = new Vector(
+                0,
+                vertices[index + vertexOffset + 1 - this.xValues * stride] - vertices[index + vertexOffset + 1],
+                -this.resolution);
+
+        if (y !== this.yValues - 1)
+            bottom = new Vector(
+                0,
+                vertices[index + vertexOffset + 1 + this.xValues * stride] - vertices[index + vertexOffset + 1],
+                this.resolution);
+
+        if (x !== 0) {
+            const left = new Vector(
+                -this.resolution,
+                vertices[index - stride + vertexOffset + 1] - vertices[index + vertexOffset + 1],
+                0);
+
+            if (bottom)
+                normal.add(bottom.copy().cross(left));
+
+            if (top)
+                normal.add(left.cross(top));
+        }
+
+
+        if (x !== this.xValues - 1) {
+            const right = new Vector(
+                this.resolution,
+                vertices[index + stride + vertexOffset + 1] - vertices[index + vertexOffset + 1],
+                0);
+
+            if (top)
+                normal.add(top.cross(right));
+
+            if (bottom)
+                normal.add(right.cross(bottom));
+        }
+
+        normal.normalize();
+
+        vertices[index + normalOffset] = normal.x;
+        vertices[index + normalOffset + 1] = normal.y;
+        vertices[index + normalOffset + 2] = normal.z;
+    }
+};
+
+/**
  * Build the height map data & upload it to the buffers
  */
 SystemTerrain.HeightMap.prototype.build = function() {
@@ -63,47 +128,10 @@ SystemTerrain.HeightMap.prototype.build = function() {
         }
     }
 
-    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
-        const index = (x + y * this.xValues) * 6;
-        const normal = new Vector();
-        let top = null;
-        let bottom = null;
-
-        if (y !== 0)
-            top = new Vector(0, vertices[index + 1 - this.xValues * 6] - vertices[index + 1], -this.resolution);
-
-        if (y !== this.yValues - 1)
-            bottom = new Vector(0, vertices[index + 1 + this.xValues * 6] - vertices[index + 1], this.resolution);
-
-        if (x !== 0) {
-            const left = new Vector(-this.resolution, vertices[index - 5] - vertices[index + 1], 0);
-
-            if (bottom)
-                normal.add(bottom.copy().cross(left));
-
-            if (top)
-                normal.add(left.cross(top));
-        }
-
-
-        if (x !== this.xValues - 1) {
-            const right = new Vector(this.resolution, vertices[index + 7] - vertices[index + 1], 0);
-
-            if (top)
-                normal.add(top.cross(right));
-
-            if (bottom)
-                normal.add(right.cross(bottom));
-        }
-
-        normal.normalize();
-
-        vertices[index + 3] = normal.x;
-        vertices[index + 4] = normal.y;
-        vertices[index + 5] = normal.z;
-    }
+    this.calculateNormals(vertices, 0, 3, 6);
 
     this.indexCount = indices.length;
+
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertices);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
