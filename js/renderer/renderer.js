@@ -19,7 +19,6 @@ const Renderer = function(canvas) {
 Renderer.prototype.ZNEAR = .1;
 Renderer.prototype.ZFAR = 100;
 Renderer.prototype.ANGLE = Math.PI * .35;
-Renderer.prototype.UP = new Vector(0, 1, 0);
 
 /**
  * Calculate the current MVP matrix
@@ -67,6 +66,6 @@ Renderer.prototype.resize = function(width, height) {
  * @param {Vector} to A vector to aim the camera towards
  */
 Renderer.prototype.view = function(from, to) {
-    this.matrixModelView.lookAt(from, to, this.UP);
+    this.matrixModelView.lookAt(from, to, Vector.UP);
     this.updateMatrices();
 };

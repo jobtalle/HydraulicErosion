@@ -39,7 +39,10 @@ const loopFunction = () => {
 };
 
 window.onresize = resize;
-window.onkeydown = () => {
+window.onkeydown = event => {
+    if (event.key !== " ")
+        return;
+
     bounty.free();
     parameters.seed = Math.floor(Math.random() * 0xFFFFFFFF);
     bounty = new Bounty(parameters, renderer);

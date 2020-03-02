@@ -11,6 +11,8 @@ const Vector = function(x = 0, y = 0, z = 0) {
     this.z = z;
 };
 
+Vector.UP = new Vector(0, 1, 0);
+
 /**
  * Copy this vector
  * @returns {Vector} A copy of the vector

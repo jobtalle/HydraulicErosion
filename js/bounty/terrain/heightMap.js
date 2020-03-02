@@ -129,7 +129,28 @@ HeightMap.prototype.sampleHeight = function(x, y) {
  * @returns {Vector} The surface normal vector at this point
  */
 HeightMap.prototype.sampleNormal = function(x, y) {
+    const radius = this.resolution;
+    const left = this.sampleHeight(x - radius, y);
+    const top = this.sampleHeight(x, y - radius);
+    const right = this.sampleHeight(x + radius, y);
+    const bottom = this.sampleHeight(x, y + radius);
 
+    const vx = new Vector(this.resolution, right - left, 0);
+    const vz = new Vector(0, bottom - top, this.resolution);
+
+    return vz.cross(vx).normalize();
+};
+
+/**
+ * Add an amount to a single value index
+ * @param {Number} xIndex The X index
+ * @param {Number} yIndex The Y index
+ * @param {Number} amount The amount of change
+ */
+HeightMap.prototype.changePoint = function(xIndex, yIndex, amount) {
+    const index = xIndex + this.xValues * yIndex;
+
+    this.values[index] += Math.max(-this.values[index], amount);
 };
 
 /**
@@ -154,8 +175,8 @@ HeightMap.prototype.change = function(x, y, amount) {
     const fx = x - xi;
     const fy = y - yi;
 
-    this.values[xi + yi * this.xValues] += fx * fy * amount;
-    this.values[xi + 1 + yi * this.xValues] += (1 - fx) * (1 - fy) * amount;
-    this.values[xi + (yi + 1) * this.xValues] += fx * fy * amount;
-    this.values[xi + 1 + (yi + 1) * this.xValues] += (1 - fx) * (1 - fy) * amount;
+    this.changePoint(xi, yi, fx * fy * amount);
+    this.changePoint(xi + 1, yi, (1 - fx) * fy * amount);
+    this.changePoint(xi, yi + 1, fx * (1 - fy) * amount);
+    this.changePoint(xi + 1, yi + 1, (1 - fx) * (1 - fy) * amount);
 };

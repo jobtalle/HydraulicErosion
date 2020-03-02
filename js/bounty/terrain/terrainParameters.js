@@ -10,7 +10,7 @@
  */
 const TerrainParameters = function(
     width = 25,
-    height = 40,
+    height = 25,
     shape = TerrainParameters.SHAPE_CONE,
     shapePower = 1.6,
     heightMapParameters = new HeightMapParameters(),
