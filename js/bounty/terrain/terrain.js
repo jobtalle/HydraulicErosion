@@ -9,8 +9,6 @@ const Terrain = function(parameters, random) {
     this.parameters = parameters;
     this.model = null;
     this.heightMap = null;
-
-    console.log("Created terrain");
 };
 
 Terrain.prototype.RESOLUTION = .15;
@@ -62,6 +60,4 @@ Terrain.prototype.createModel = function(renderer) {
 Terrain.prototype.free = function() {
     if (this.model)
         this.model.free();
-
-    console.log("Freed terrain");
 };

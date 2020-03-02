@@ -51,7 +51,7 @@ Bounty.prototype.update = function(timeStep) {
     this.renderer.view(
         new Vector(
             cx + Math.cos(this.angle) * r,
-            .5 * r,
+            .35 * r,
             cy + Math.sin(this.angle) * r
         ),
         new Vector(cx, 0, cy));
