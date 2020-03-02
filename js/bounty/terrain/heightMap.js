@@ -92,6 +92,43 @@ HeightMap.prototype.generate = function() {
 };
 
 /**
+ * Apply gaussian blur to the height values
+ * @param {Number} amount The amount of blur in the range [0, 1]
+ */
+HeightMap.prototype.blur = function(amount) {
+    // TODO: Buffer less
+    const newValues = new Array(this.values.length);
+
+    for (let y = 1; y < this.yValues - 1; ++y) {
+        for (let x = 1; x < this.xValues - 1; ++x) {
+            const left = this.values[x + y * this.xValues - 1];
+            const right = this.values[x + y * this.xValues + 1];
+            const top = this.values[x + (y - 1) * this.xValues];
+            const bottom = this.values[x + (y + 1) * this.xValues];
+            const leftTop = this.values[x + (y - 1) * this.xValues - 1];
+            const leftBottom = this.values[x + (y + 1) * this.xValues - 1];
+            const rightTop = this.values[x + (y - 1) * this.xValues + 1];
+            const rightBottom = this.values[x + (y + 1) * this.xValues + 1];
+
+            newValues[x + y * this.xValues] =
+                left * .125 +
+                right * .125 +
+                top * .125 +
+                bottom * .125 +
+                leftTop * .0625 +
+                leftBottom * .0625 +
+                rightTop * .0625 +
+                rightBottom * .0625 +
+                this.values[x + y * this.xValues] * .25;
+        }
+    }
+
+    for (let y = 1; y < this.yValues - 1; ++y)
+        for (let x = 1; x < this.xValues - 1; ++x)
+            this.values[x + y * this.xValues] += amount * (newValues[x + y * this.xValues] - this.values[x + y * this.xValues]);
+};
+
+/**
  * Sample terrain height
  * @param {Number} x The X coordinate
  * @param {Number} y The Y coordinate

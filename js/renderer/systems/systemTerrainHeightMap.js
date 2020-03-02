@@ -109,6 +109,7 @@ SystemTerrain.HeightMap.prototype.build = function() {
         vertices[index + 2] = y * this.resolution;
 
         if (x !== this.xValues - 1 && y !== this.yValues - 1) {
+            // TODO: Triangle direction should depend on slope direction
             if ((x + (y & 1)) & 1)
                 indices.push(
                     x + (y + 1) * this.xValues,

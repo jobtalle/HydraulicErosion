@@ -36,7 +36,7 @@ SystemTerrain.prototype.SHADER_FRAGMENT = `
 varying mediump vec3 iNormal;
 
 void main() {
-  gl_FragColor = vec4(normalize(iNormal) * 0.5 + vec3(0.5), 1.0);
+  gl_FragColor = vec4(vec3(1.0) * (0.3 + 0.7 * max(0.0, dot(normalize(iNormal), normalize(vec3(0.5, -1.0, 0.5))))), 1.0);
 }
 `;
 

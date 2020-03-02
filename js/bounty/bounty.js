@@ -8,7 +8,7 @@ const Bounty = function(parameters, renderer) {
     this.random = new Random(parameters.seed);
     this.parameters = parameters;
     this.renderer = renderer;
-    this.angle = 0;
+    this.angle = Math.random() * Math.PI * 2;
     this.terrain = null;
     this.genQueue = [
         () => this.terrain = new Terrain(parameters.terrainParameters, this.random),
