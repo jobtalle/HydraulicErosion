@@ -107,26 +107,34 @@ SystemTerrain.HeightMap.prototype.build = function() {
         vertices[index] = x * this.resolution;
         vertices[index + 1] = this.values[x + y * this.xValues];
         vertices[index + 2] = y * this.resolution;
+    }
 
-        if (x !== this.xValues - 1 && y !== this.yValues - 1) {
-            // TODO: Triangle direction should depend on slope direction
-            if ((x + (y & 1)) & 1)
-                indices.push(
-                    x + (y + 1) * this.xValues,
-                    x + y * this.xValues,
-                    x + y * this.xValues + 1,
-                    x + y * this.xValues + 1,
-                    x + (y + 1) * this.xValues + 1,
-                    x + (y + 1) * this.xValues);
-            else
-                indices.push(
-                    x + y * this.xValues,
-                    x + y * this.xValues + 1,
-                    x + (y + 1) * this.xValues + 1,
-                    x + (y + 1) * this.xValues + 1,
-                    x + (y + 1) * this.xValues,
-                    x + y * this.xValues);
-        }
+    for (let y = 0; y < this.yValues - 1; ++y) for (let x = 0; x < this.xValues - 1; ++x) {
+        const iLeftTop = x + y * this.xValues;
+        const iRightTop = iLeftTop + 1;
+        const iLeftBottom = x + (y + 1) * this.xValues;
+        const iRightBottom = iLeftBottom + 1;
+
+        if (
+            Math.abs(vertices[iRightBottom * 6 + 1] - vertices[iLeftTop * 6 + 1]) >
+            Math.abs(vertices[iRightTop * 6 + 1] - vertices[iLeftBottom * 6 + 1]))
+            indices.push(
+                iLeftBottom,
+                iLeftTop,
+                iRightTop,
+                iRightTop,
+                iRightBottom,
+                iLeftBottom
+            );
+        else
+            indices.push(
+                iLeftTop,
+                iRightTop,
+                iRightBottom,
+                iRightBottom,
+                iLeftBottom,
+                iLeftTop
+            );
     }
 
     this.calculateNormals(vertices, 0, 3, 6);
