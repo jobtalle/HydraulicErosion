@@ -11,8 +11,8 @@
 const HeightMapParameters = function(
     octaves = 6,
     scale = .12,
-    influenceFalloff = .44,
-    scaleFalloff = 1.7,
+    influenceFalloff = .5,
+    scaleFalloff = 1.6,
     amplitude = 25,
     heightPower = 3.5) {
     this.octaves = octaves;

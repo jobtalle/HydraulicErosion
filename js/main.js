@@ -3,8 +3,8 @@ const TIME_STEP_MAX = 0.1;
 const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
 const renderer = new Renderer(canvas);
-const parameters = new BountyParameters();
-let bounty = new Bounty(parameters, renderer);
+const parameters = new IslandParameters();
+const archipelago = new Archipelago(renderer);
 let lastDate = new Date();
 
 /**
@@ -22,7 +22,7 @@ const resize = () => {
  * @param {Number} timeStep Passed time in seconds
  */
 const update = timeStep => {
-    bounty.update(timeStep);
+    archipelago.update(timeStep);
     renderer.draw();
 };
 
@@ -39,13 +39,16 @@ const loopFunction = () => {
 };
 
 window.onresize = resize;
-window.onkeydown = event => {
-    if (event.key !== " ")
-        return;
-
-    bounty.free();
-    parameters.seed = Math.floor(Math.random() * 0xFFFFFFFF);
-    bounty = new Bounty(parameters, renderer);
+window.onkeydown = event => archipelago.pressKey(event.key);
+window.onmousemove = event => archipelago.mouseMove(event.clientX, event.clientY);
+window.onmousewheel = event => archipelago.mouseScroll(Math.sign(event.deltaY));
+window.onmousedown = event => {
+    if (event.button === 0)
+        archipelago.mousePress(event.clientX, event.clientY);
+};
+window.onmouseup = () => {
+    if (event.button === 0)
+        archipelago.mouseRelease();
 };
 
 resize();

@@ -4,6 +4,7 @@
  * @param {Number} [erosionRate] The rate of soil removal
  * @param {Number} [depositionRate] The percentage of soil that is deposited while eroding
  * @param {Number} [friction] Droplet friction
+ * @param {Number} [acceleration] Droplet acceleration
  * @param {Number} [radius] The influence radius of a droplet
  * @param {Number} [steepnessThreshold] The threshold over which droplets start to erode soil
  * @param {Number} [steepnessInfluence] The influence of steepness on the erosion rate
@@ -11,18 +12,20 @@
  * @constructor
  */
 const ErosionParameters = function(
-    dropsPerCell = .8,
-    erosionRate = .19,
+    dropsPerCell = .7,
+    erosionRate = .11,
     depositionRate = .03,
-    friction = .75,
-    radius = 1.9,
-    steepnessThreshold = .2,
-    steepnessInfluence = 0.5,
-    postBlur = 1) {
+    friction = .8,
+    acceleration = .14,
+    radius = 1.2,
+    steepnessThreshold = .1,
+    steepnessInfluence = 0.75,
+    postBlur = .85) {
     this.dropsPerCell = dropsPerCell;
     this.erosionRate = erosionRate;
     this.depositionRate = depositionRate;
     this.friction = friction;
+    this.acceleration = acceleration;
     this.radius = radius;
     this.steepnessThreshold = steepnessThreshold;
     this.steepnessInfluence = steepnessInfluence;

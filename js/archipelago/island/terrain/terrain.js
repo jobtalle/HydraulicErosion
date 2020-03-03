@@ -11,8 +11,6 @@ const Terrain = function(parameters, random) {
     this.heightMap = null;
 };
 
-Terrain.prototype.RESOLUTION = .1;
-
 /**
  * Created a height mask shape based on the terrain parameters
  * @returns {Object} One of the valid height mask shapes
@@ -21,7 +19,7 @@ Terrain.prototype.createShape = function() {
     switch (this.parameters.shape) {
         default:
         case TerrainParameters.SHAPE_CONE:
-            return new ShapeCone(this.parameters.width, this.parameters.height, this.parameters.shapePower, this.random);
+            return new ShapeCone(this.parameters.width, this.parameters.height, this.parameters.shapePower);
     }
 };
 
@@ -36,7 +34,7 @@ Terrain.prototype.createVolcanoes = function() {
  * Apply erosion to the terrain
  */
 Terrain.prototype.erode = function() {
-    new Erosion(this.parameters.erosionParameters, this.RESOLUTION, this.random).apply(this.heightMap);
+    new Erosion(this.parameters.erosionParameters, this.parameters.resolution, this.random).apply(this.heightMap);
 };
 
 /**
@@ -45,9 +43,9 @@ Terrain.prototype.erode = function() {
 Terrain.prototype.createHeightMap = function() {
     this.heightMap = new HeightMap(
         this.parameters.heightMapParameters,
-        Math.ceil(this.parameters.width / this.RESOLUTION) + 1,
-        Math.ceil(this.parameters.height / this.RESOLUTION) + 1,
-        this.RESOLUTION,
+        Math.ceil(this.parameters.width / this.parameters.resolution) + 1,
+        Math.ceil(this.parameters.height / this.parameters.resolution) + 1,
+        this.parameters.resolution,
         this.createShape(),
         this.random);
 };
@@ -61,7 +59,7 @@ Terrain.prototype.createModel = function(renderer) {
         this.heightMap.xValues,
         this.heightMap.yValues,
         this.heightMap.values,
-        this.RESOLUTION);
+        this.parameters.resolution);
 };
 
 /**

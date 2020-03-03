@@ -4,6 +4,7 @@
  * @param {Number} [height] Terrain height
  * @param {String} [shape] A shape to mask the height map with
  * @param {Number} [shapePower] A power to apply to shapes
+ * @param {Number} [resolution] A height map & mesh grid resolution
  * @param {HeightMapParameters} [heightMapParameters] Parameters for height map generation
  * @param {ErosionParameters} [erosionParameters] Parameters for erosion simulation
  * @param {VolcanoesParameters} [volcanoesParameters] Parameters for volcano generation
@@ -13,7 +14,8 @@ const TerrainParameters = function(
     width = 25,
     height = 35,
     shape = TerrainParameters.SHAPE_CONE,
-    shapePower = 1.6,
+    shapePower = 1.55,
+    resolution = .1,
     heightMapParameters = new HeightMapParameters(),
     erosionParameters = new ErosionParameters(),
     volcanoesParameters = new VolcanoesParameters()) {
@@ -21,6 +23,7 @@ const TerrainParameters = function(
     this.height = height;
     this.shape = shape;
     this.shapePower = shapePower;
+    this.resolution = resolution;
     this.heightMapParameters = heightMapParameters;
     this.erosionParameters = erosionParameters;
     this.volcanoesParameters = volcanoesParameters;

@@ -3,10 +3,9 @@
  * @param {Number} width The height map width
  * @param {Number} height The height map height
  * @param {Number} power A power to apply to the peak distance
- * @param {Random} random A randomizer
  * @constructor
  */
-const ShapeCone = function(width, height, power, random) {
+const ShapeCone = function(width, height, power) {
     this.width = width;
     this.height = height;
     this.power = power;

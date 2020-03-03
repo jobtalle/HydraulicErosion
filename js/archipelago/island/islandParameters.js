@@ -4,7 +4,7 @@
  * @param {TerrainParameters} [terrainParameters] Parameters for terrain generation
  * @constructor
  */
-const BountyParameters = function(
+const IslandParameters = function(
     seed = Math.floor(Math.random() * 0xFFFFFFFF),
     terrainParameters = new TerrainParameters()) {
     this.seed = seed;
