@@ -73,10 +73,6 @@ HeightMap.prototype.makeInfluences = function(octaves, falloff) {
 HeightMap.prototype.generate = function() {
     const noises = this.createNoises();
     const influences = this.makeInfluences(this.parameters.octaves, this.parameters.influenceFalloff);
-    const rimNoise = new CubicNoise(
-        Math.ceil(this.xValues * this.resolution * this.parameters.volcanoThresholdScale),
-        Math.ceil(this.yValues * this.resolution * this.parameters.volcanoThresholdScale),
-        this.random);
 
     for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
         const index = x + y * this.xValues;
@@ -97,21 +93,6 @@ HeightMap.prototype.generate = function() {
 
         if (this.maxHeight < this.values[index])
             this.maxHeight = this.values[index];
-    }
-
-    const volcanoThreshold = Math.max(
-        this.parameters.volcanoThreshold,
-        this.maxHeight - this.parameters.volcanoMaxDepth);
-
-    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
-        const index = x + y * this.xValues;
-        const threshold = (rimNoise.sample(
-            x * this.resolution * this.parameters.volcanoThresholdScale,
-            y * this.resolution * this.parameters.volcanoThresholdScale) - .5) *
-            this.parameters.volcanoThresholdAmplitude + volcanoThreshold;
-
-        if (this.values[index] > threshold)
-            this.values[index] -= (this.values[index] - threshold) * 2;
     }
 };
 

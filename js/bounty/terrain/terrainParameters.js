@@ -6,6 +6,7 @@
  * @param {Number} [shapePower] A power to apply to shapes
  * @param {HeightMapParameters} [heightMapParameters] Parameters for height map generation
  * @param {ErosionParameters} [erosionParameters] Parameters for erosion simulation
+ * @param {VolcanoesParameters} [volcanoesParameters] Parameters for volcano generation
  * @constructor
  */
 const TerrainParameters = function(
@@ -14,13 +15,15 @@ const TerrainParameters = function(
     shape = TerrainParameters.SHAPE_CONE,
     shapePower = 1.6,
     heightMapParameters = new HeightMapParameters(),
-    erosionParameters = new ErosionParameters()) {
+    erosionParameters = new ErosionParameters(),
+    volcanoesParameters = new VolcanoesParameters()) {
     this.width = width;
     this.height = height;
     this.shape = shape;
     this.shapePower = shapePower;
     this.heightMapParameters = heightMapParameters;
     this.erosionParameters = erosionParameters;
+    this.volcanoesParameters = volcanoesParameters;
 };
 
 TerrainParameters.SHAPE_CONE = "cone";

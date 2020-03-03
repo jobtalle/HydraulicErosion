@@ -25,6 +25,16 @@ Terrain.prototype.createShape = function() {
     }
 };
 
+/**
+ * Create volcanoes on this terrain
+ */
+Terrain.prototype.createVolcanoes = function() {
+    new Volcanoes(this.parameters.volcanoesParameters, this.random).apply(this.heightMap);
+};
+
+/**
+ * Apply erosion to the terrain
+ */
 Terrain.prototype.erode = function() {
     new Erosion(this.parameters.erosionParameters, this.RESOLUTION, this.random).apply(this.heightMap);
 };
