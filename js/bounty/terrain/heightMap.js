@@ -22,6 +22,7 @@ const HeightMap = function(
     this.shape = shape;
     this.random = random;
     this.values = new Array(xValues * yValues);
+    this.maxHeight = 0;
 
     this.generate();
 };
@@ -72,8 +73,13 @@ HeightMap.prototype.makeInfluences = function(octaves, falloff) {
 HeightMap.prototype.generate = function() {
     const noises = this.createNoises();
     const influences = this.makeInfluences(this.parameters.octaves, this.parameters.influenceFalloff);
+    const rimNoise = new CubicNoise(
+        Math.ceil(this.xValues * this.resolution * this.parameters.volcanoThresholdScale),
+        Math.ceil(this.yValues * this.resolution * this.parameters.volcanoThresholdScale),
+        this.random);
 
     for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
+        const index = x + y * this.xValues;
         let scale = this.parameters.scale * this.resolution;
         let height = 0;
 
@@ -84,11 +90,51 @@ HeightMap.prototype.generate = function() {
                 scale *= this.parameters.scaleFalloff;
         }
 
-        this.values[x + y * this.xValues] =
+        this.values[index] =
             (height ** this.parameters.heightPower) *
             this.parameters.amplitude *
             this.shape.sample(x * this.resolution, y * this.resolution);
+
+        if (this.maxHeight < this.values[index])
+            this.maxHeight = this.values[index];
     }
+
+    const volcanoThreshold = Math.max(
+        this.parameters.volcanoThreshold,
+        this.maxHeight - this.parameters.volcanoMaxDepth);
+
+    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
+        const index = x + y * this.xValues;
+        const threshold = (rimNoise.sample(
+            x * this.resolution * this.parameters.volcanoThresholdScale,
+            y * this.resolution * this.parameters.volcanoThresholdScale) - .5) *
+            this.parameters.volcanoThresholdAmplitude + volcanoThreshold;
+
+        if (this.values[index] > threshold)
+            this.values[index] -= (this.values[index] - threshold) * 2;
+    }
+};
+
+/**
+ * Add an amount to a single value index
+ * @param {Number} xIndex The X index
+ * @param {Number} yIndex The Y index
+ * @param {Number} amount The amount of change
+ */
+HeightMap.prototype.changePoint = function(xIndex, yIndex, amount) {
+    const index = xIndex + this.xValues * yIndex;
+
+    this.values[index] += Math.max(-this.values[index], amount);
+};
+
+/**
+ * Return the height value from a single point
+ * @param {Number} xIndex The X index
+ * @param {Number} yIndex The Y index
+ * @return {Number} The height value at the given point
+ */
+HeightMap.prototype.getPoint = function(xIndex, yIndex) {
+    return this.values[xIndex + yIndex * this.xValues];
 };
 
 /**
@@ -96,36 +142,27 @@ HeightMap.prototype.generate = function() {
  * @param {Number} amount The amount of blur in the range [0, 1]
  */
 HeightMap.prototype.blur = function(amount) {
-    // TODO: Buffer less
-    const newValues = new Array(this.values.length);
+    const newValues = new Array((this.xValues - 2) * (this.yValues - 2));
 
-    for (let y = 1; y < this.yValues - 1; ++y) {
-        for (let x = 1; x < this.xValues - 1; ++x) {
-            const left = this.values[x + y * this.xValues - 1];
-            const right = this.values[x + y * this.xValues + 1];
-            const top = this.values[x + (y - 1) * this.xValues];
-            const bottom = this.values[x + (y + 1) * this.xValues];
-            const leftTop = this.values[x + (y - 1) * this.xValues - 1];
-            const leftBottom = this.values[x + (y + 1) * this.xValues - 1];
-            const rightTop = this.values[x + (y - 1) * this.xValues + 1];
-            const rightBottom = this.values[x + (y + 1) * this.xValues + 1];
-
-            newValues[x + y * this.xValues] =
-                left * .125 +
-                right * .125 +
-                top * .125 +
-                bottom * .125 +
-                leftTop * .0625 +
-                leftBottom * .0625 +
-                rightTop * .0625 +
-                rightBottom * .0625 +
-                this.values[x + y * this.xValues] * .25;
-        }
+    for (let y = 1; y < this.yValues - 1; ++y) for (let x = 1; x < this.xValues - 1; ++x) {
+        newValues[x - 1 + (y - 1) * (this.xValues - 2)] =
+            (
+                this.getPoint(x - 1, y) +
+                this.getPoint(x, y - 1) +
+                this.getPoint(x + 1, y) +
+                this.getPoint(x, y + 1)
+            ) * .125 +
+            (
+                this.getPoint(x - 1, y -1) +
+                this.getPoint(x + 1, y - 1) +
+                this.getPoint(x + 1, y + 1) +
+                this.getPoint(x - 1, y + 1)
+            ) * .0625 +
+            this.values[x + y * this.xValues] * .25;
     }
 
-    for (let y = 1; y < this.yValues - 1; ++y)
-        for (let x = 1; x < this.xValues - 1; ++x)
-            this.values[x + y * this.xValues] += amount * (newValues[x + y * this.xValues] - this.values[x + y * this.xValues]);
+    for (let y = 1; y < this.yValues - 1; ++y) for (let x = 1; x < this.xValues - 1; ++x)
+            this.changePoint(x, y, amount * (newValues[x - 1 + (y - 1) * (this.xValues - 2)] - this.getPoint(x, y)));
 };
 
 /**
@@ -176,18 +213,6 @@ HeightMap.prototype.sampleNormal = function(x, y) {
     const vz = new Vector(0, bottom - top, this.resolution);
 
     return vz.cross(vx).normalize();
-};
-
-/**
- * Add an amount to a single value index
- * @param {Number} xIndex The X index
- * @param {Number} yIndex The Y index
- * @param {Number} amount The amount of change
- */
-HeightMap.prototype.changePoint = function(xIndex, yIndex, amount) {
-    const index = xIndex + this.xValues * yIndex;
-
-    this.values[index] += Math.max(-this.values[index], amount);
 };
 
 /**

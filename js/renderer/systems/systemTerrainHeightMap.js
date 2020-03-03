@@ -144,7 +144,7 @@ SystemTerrain.HeightMap.prototype.build = function() {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertices);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), this.gl.STATIC_DRAW);
 };
 
 /**
@@ -160,7 +160,7 @@ SystemTerrain.HeightMap.prototype.draw = function(shader) {
     this.gl.enableVertexAttribArray(shader.aNormal);
     this.gl.vertexAttribPointer(shader.aNormal, 3, this.gl.FLOAT, false, 24, 12);
 
-    this.gl.drawElements(this.gl.TRIANGLES, this.indexCount, this.gl.UNSIGNED_SHORT, 0);
+    this.gl.drawElements(this.gl.TRIANGLES, this.indexCount, this.gl.UNSIGNED_INT, 0);
 };
 
 /**

@@ -11,7 +11,7 @@ const Terrain = function(parameters, random) {
     this.heightMap = null;
 };
 
-Terrain.prototype.RESOLUTION = .12;
+Terrain.prototype.RESOLUTION = .1;
 
 /**
  * Created a height mask shape based on the terrain parameters

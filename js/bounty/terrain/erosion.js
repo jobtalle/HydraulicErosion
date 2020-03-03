@@ -12,7 +12,7 @@ const Erosion = function(parameters, resolution, random) {
 };
 
 Erosion.prototype.TRACE_THRESHOLD = .01;
-Erosion.prototype.MAX_ITERATIONS = 150;
+Erosion.prototype.MAX_ITERATIONS = 250;
 
 /**
  * Let a droplet erode the height map
@@ -23,6 +23,7 @@ Erosion.prototype.MAX_ITERATIONS = 150;
 Erosion.prototype.trace = function(x, y, heightMap) {
     const ox = (-1 + 2 * this.random.getFloat()) * this.resolution * this.parameters.radius;
     const oy = (-1 + 2 * this.random.getFloat()) * this.resolution * this.parameters.radius;
+    let first = true;
     let sediment = 0;
     let vx = 0;
     let vy = 0;
@@ -31,15 +32,16 @@ Erosion.prototype.trace = function(x, y, heightMap) {
         const surfaceNormal = heightMap.sampleNormal(x, y);
         let steepness = (1 - Vector.UP.dot(surfaceNormal));
 
-        if (steepness < this.TRACE_THRESHOLD)
+        if ((!first && steepness < this.TRACE_THRESHOLD) || steepness < this.parameters.steepnessThreshold)
             return;
 
+        first = false;
         steepness = steepness * this.parameters.steepnessInfluence + (1 - this.parameters.steepnessInfluence);
 
         const speed = Math.sqrt(vx * vx + vy * vy);
         const slope = Math.sqrt(surfaceNormal.x * surfaceNormal.x + surfaceNormal.z * surfaceNormal.z);
         const erosion = Math.min(speed * this.parameters.erosionRate, heightMap.sampleHeight(x, y)) * steepness;
-        const deposit = sediment * this.parameters.depositionRate * steepness;
+        const deposit = sediment * this.parameters.depositionRate;
 
         sediment += erosion - deposit;
 
@@ -67,11 +69,12 @@ Erosion.prototype.trace = function(x, y, heightMap) {
 Erosion.prototype.apply = function(heightMap) {
     const drops = this.parameters.dropsPerCell * (heightMap.xValues - 1) * (heightMap.yValues - 1);
 
-    for (let i = 0; i < drops; ++i)
+    for (let i = 0; i < drops; ++i) {
         this.trace(
             this.random.getFloat() * heightMap.xValues * this.resolution,
             this.random.getFloat() * heightMap.yValues * this.resolution,
             heightMap);
+    }
 
     heightMap.blur(this.parameters.postBlur);
 };
