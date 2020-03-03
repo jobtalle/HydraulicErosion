@@ -4,7 +4,7 @@ const CameraOrbit = function(renderer) {
     this.center = new Vector();
     this.angle = 0;
     this.pitch = Math.PI * .125;
-    this.radius = 1;
+    this.radius = this.RADIUS_DEFAULT;
     this.mouseDown = false;
     this.mouseX = 0;
     this.mouseY = 0;
@@ -14,6 +14,7 @@ CameraOrbit.prototype.ANGLE_SENSITIVITY = .008;
 CameraOrbit.prototype.PITCH_SENSITIVITY = .008;
 CameraOrbit.prototype.PITCH_MIN = 0;
 CameraOrbit.prototype.PITCH_MAX = Math.PI * .499999;
+CameraOrbit.prototype.RADIUS_DEFAULT = 20;
 CameraOrbit.prototype.RADIUS_MIN = .1;
 CameraOrbit.prototype.RADIUS_MAX = 60;
 CameraOrbit.prototype.RADIUS_SPEED = .12;
@@ -26,7 +27,6 @@ CameraOrbit.prototype.setIsland = function(island) {
     this.center.x = island.parameters.terrainParameters.width * .5;
     this.center.y = 0;
     this.center.z = island.parameters.terrainParameters.height * .5;
-    this.radius = this.center.length();
 };
 
 /**
