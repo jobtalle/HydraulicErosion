@@ -3,11 +3,11 @@
  * @constructor
  */
 const ErosionParameters = function(
-    dropsPerCell = .8,
-    erosionRate = .25,
+    dropsPerCell = 1,
+    erosionRate = .2,
     depositionRate = .05,
-    friction = .85,
-    radius = 2.5,
+    friction = .8,
+    radius = 2.4,
     steepnessInfluence = .9) {
     this.dropsPerCell = dropsPerCell;
     this.erosionRate = erosionRate;
