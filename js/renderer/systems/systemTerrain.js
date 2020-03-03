@@ -39,10 +39,7 @@ varying mediump vec3 iNormal;
 varying mediump float h;
 
 void main() {
-  if (h < 0.1)
-    discard;
-  
-  gl_FragColor = vec4(vec3(1.0) * (0.3 + 0.7 * max(0.0, dot(normalize(iNormal), normalize(vec3(0.5, -1.0, 0.5))))), 1.0);
+  gl_FragColor = vec4(vec3(h * 0.15 + 0.2) * (0.3 + 0.7 * max(0.0, dot(normalize(iNormal), normalize(vec3(0.5, -1.0, 0.5))))), 1.0);
 }
 `;
 

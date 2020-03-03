@@ -29,7 +29,7 @@ Erosion.prototype.trace = function(x, y, heightMap) {
 
     for (let i = 0; i < this.MAX_ITERATIONS; ++i) {
         const surfaceNormal = heightMap.sampleNormal(x, y);
-        let steepness = 1 - Vector.UP.dot(surfaceNormal);
+        let steepness = (1 - Vector.UP.dot(surfaceNormal));
 
         if (steepness < this.TRACE_THRESHOLD)
             return;
@@ -73,5 +73,5 @@ Erosion.prototype.apply = function(heightMap) {
             this.random.getFloat() * heightMap.yValues * this.resolution,
             heightMap);
 
-    heightMap.blur(.8);
+    heightMap.blur(this.parameters.postBlur);
 };
