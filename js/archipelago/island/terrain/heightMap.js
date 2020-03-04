@@ -184,14 +184,14 @@ HeightMap.prototype.sampleHeight = function(x, y) {
  * @returns {Vector} The surface normal vector at this point
  */
 HeightMap.prototype.sampleNormal = function(x, y) {
-    const radius = this.resolution * 2;
+    const radius = this.resolution;
     const left = this.sampleHeight(x - radius, y);
     const top = this.sampleHeight(x, y - radius);
     const right = this.sampleHeight(x + radius, y);
     const bottom = this.sampleHeight(x, y + radius);
 
-    const vx = new Vector(this.resolution, right - left, 0);
-    const vz = new Vector(0, bottom - top, this.resolution);
+    const vx = new Vector(radius, right - left, 0);
+    const vz = new Vector(0, bottom - top, radius);
 
     return vz.cross(vx).normalize();
 };

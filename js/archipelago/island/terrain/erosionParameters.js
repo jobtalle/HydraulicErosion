@@ -12,15 +12,17 @@
  * @constructor
  */
 const ErosionParameters = function(
-    dropsPerCell = .7,
-    erosionRate = .11,
-    depositionRate = .03,
-    friction = .8,
-    acceleration = .14,
+    dropsPerCell = 1,
+    erosionRate = .14,
+    depositionRate = .04,
+    friction = .94,
+    acceleration = .22,
     radius = 1.2,
-    steepnessThreshold = .1,
-    steepnessInfluence = 0.75,
-    postBlur = .85) {
+    steepnessThreshold = .01,
+    steepnessInfluence = 0.9,
+    postBlur = 1,
+    sedimentMax = .17,
+    sedimentUptakeMax = .0055) {
     this.dropsPerCell = dropsPerCell;
     this.erosionRate = erosionRate;
     this.depositionRate = depositionRate;
@@ -30,4 +32,6 @@ const ErosionParameters = function(
     this.steepnessThreshold = steepnessThreshold;
     this.steepnessInfluence = steepnessInfluence;
     this.postBlur = postBlur;
+    this.sedimentMax = sedimentMax;
+    this.sedimentUptakeMax = sedimentUptakeMax;
 };
