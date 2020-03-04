@@ -33,7 +33,7 @@ Erosion.prototype.trace = function(x, y, heightMap) {
         const speed = Math.sqrt(vx * vx + vy * vy);
         let steepness = 1 - Vector.UP.dot(surfaceNormal);
 
-        if (steepness < this.parameters.steepnessThreshold && sediment < .015)
+        if (sediment < this.parameters.sedimentEvaporateThreshold && steepness < this.parameters.steepnessThreshold)
             break;
 
         steepness = this.parameters.steepnessInfluence * steepness + (1 - this.parameters.steepnessInfluence);
@@ -63,8 +63,8 @@ Erosion.prototype.trace = function(x, y, heightMap) {
         if (slope !== 0) {
             const m = this.parameters.acceleration * this.resolution / slope;
 
-            vx += surfaceNormal.x * m;
-            vy += surfaceNormal.z * m;
+            vx = surfaceNormal.x * m;
+            vy = surfaceNormal.z * m;
         }
 
         xp = x;
@@ -73,7 +73,7 @@ Erosion.prototype.trace = function(x, y, heightMap) {
         y += vy;
     }
 
-    // heightMap.change(x, y, sediment);
+    heightMap.change(x, y, sediment);
 };
 
 /**
