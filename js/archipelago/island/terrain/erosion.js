@@ -18,37 +18,34 @@ const Erosion = function(parameters, resolution, random) {
  * @param {HeightMap} heightMap The height map to erode
  */
 Erosion.prototype.trace = function(x, y, heightMap) {
-    const ox = (-1 + this.random.getFloat() * 2) * this.parameters.radius * this.resolution;
-    const oy = (-1 + this.random.getFloat() * 2) * this.parameters.radius * this.resolution;
-    let flats = 0;
+    const ox = (this.random.getFloat() * 2 - 1) * this.parameters.radius * this.resolution;
+    const oy = (this.random.getFloat() * 2 - 1) * this.parameters.radius * this.resolution;
     let sediment = 0;
     let xp = x;
     let yp = y;
+    let vx = 0;
+    let vy = 0;
 
     for (let i = 0; i < this.parameters.maxIterations; ++i) {
-        const surfaceNormal = heightMap.sampleNormal(x, y);
-        const flatness = Vector.UP.dot(surfaceNormal);
+        const surfaceNormal = heightMap.sampleNormal(x + ox, y + oy);
 
-        if (flatness === 1)
+        if (surfaceNormal.y === 1)
             break;
 
-        flats = 0;
+        const erosion = this.parameters.erosionRate * (1 - surfaceNormal.y);
+        const deposit = sediment * this.parameters.depositionRate * surfaceNormal.y;
 
-        const slopeMagnitude = Math.sqrt(surfaceNormal.x * surfaceNormal.x + surfaceNormal.z * surfaceNormal.z);
-        const slopeSpeed = this.parameters.speed * this.resolution / slopeMagnitude;
-        const erosion = this.parameters.erosionRate * (1 - flatness);
-        const deposit = sediment * this.parameters.depositionRate * flatness;
+        heightMap.change(xp, yp,deposit - erosion);
 
-        heightMap.change(xp + ox, yp + oy, deposit - erosion);
+        vx = this.parameters.friction * vx + surfaceNormal.x * this.parameters.speed * this.resolution;
+        vy = this.parameters.friction * vy + surfaceNormal.z * this.parameters.speed * this.resolution;
 
         xp = x;
         yp = y;
-        x += surfaceNormal.x * slopeSpeed;
-        y += surfaceNormal.z * slopeSpeed;
+        x += vx;
+        y += vy;
         sediment += erosion - deposit;
     }
-
-    heightMap.change(xp + ox, yp + oy, sediment);
 };
 
 /**
