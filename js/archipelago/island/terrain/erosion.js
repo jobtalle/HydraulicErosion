@@ -11,8 +11,6 @@ const Erosion = function(parameters, resolution, random) {
     this.random = random;
 };
 
-Erosion.prototype.MAX_ITERATIONS = 500;
-
 /**
  * Let a droplet erode the height map
  * @param {Number} x The X coordinate to start at
@@ -22,58 +20,35 @@ Erosion.prototype.MAX_ITERATIONS = 500;
 Erosion.prototype.trace = function(x, y, heightMap) {
     const ox = (-1 + this.random.getFloat() * 2) * this.parameters.radius * this.resolution;
     const oy = (-1 + this.random.getFloat() * 2) * this.parameters.radius * this.resolution;
+    let flats = 0;
     let sediment = 0;
-    let vx = 0;
-    let vy = 0;
     let xp = x;
     let yp = y;
 
-    for (let i = 0; i < this.MAX_ITERATIONS; ++i) {
+    for (let i = 0; i < this.parameters.maxIterations; ++i) {
         const surfaceNormal = heightMap.sampleNormal(x, y);
-        const speed = Math.sqrt(vx * vx + vy * vy);
-        let steepness = 1 - Vector.UP.dot(surfaceNormal);
+        const flatness = Vector.UP.dot(surfaceNormal);
 
-        if (sediment < this.parameters.sedimentEvaporateThreshold && steepness < this.parameters.steepnessThreshold)
+        if (flatness === 1)
             break;
 
-        steepness = this.parameters.steepnessInfluence * steepness + (1 - this.parameters.steepnessInfluence);
+        flats = 0;
 
-        const slope = Math.sqrt(surfaceNormal.x * surfaceNormal.x + surfaceNormal.z * surfaceNormal.z);
-        const sedimentRoom = this.parameters.sedimentMax - sediment;
+        const slopeMagnitude = Math.sqrt(surfaceNormal.x * surfaceNormal.x + surfaceNormal.z * surfaceNormal.z);
+        const slopeSpeed = this.parameters.speed * this.resolution / slopeMagnitude;
+        const erosion = this.parameters.erosionRate * (1 - flatness);
+        const deposit = sediment * this.parameters.depositionRate * flatness;
 
-        if (sedimentRoom < 0) {
-            sediment += sedimentRoom;
-
-            heightMap.change(xp + ox, yp + oy, sedimentRoom);
-        }
-        else {
-            const erosion = Math.min(
-                this.parameters.sedimentUptakeMax,
-                Math.min(sedimentRoom, speed * this.parameters.erosionRate * steepness));
-            const deposit = sediment * this.parameters.depositionRate * (1 - steepness);
-
-            sediment += erosion - deposit;
-
-            heightMap.change(xp + ox, yp + oy, deposit - erosion);
-        }
-
-        vx *= this.parameters.friction;
-        vy *= this.parameters.friction;
-
-        if (slope !== 0) {
-            const m = this.parameters.acceleration * this.resolution / slope;
-
-            vx = surfaceNormal.x * m;
-            vy = surfaceNormal.z * m;
-        }
+        heightMap.change(xp + ox, yp + oy, deposit - erosion);
 
         xp = x;
         yp = y;
-        x += vx;
-        y += vy;
+        x += surfaceNormal.x * slopeSpeed;
+        y += surfaceNormal.z * slopeSpeed;
+        sediment += erosion - deposit;
     }
 
-    heightMap.change(x, y, sediment);
+    heightMap.change(xp + ox, yp + oy, sediment);
 };
 
 /**
@@ -83,12 +58,11 @@ Erosion.prototype.trace = function(x, y, heightMap) {
 Erosion.prototype.apply = function(heightMap) {
     const drops = this.parameters.dropsPerCell * (heightMap.xValues - 1) * (heightMap.yValues - 1);
 
-    for (let i = 0; i < drops; ++i) {
+    for (let i = 0; i < drops; ++i)
         this.trace(
             this.random.getFloat() * heightMap.xValues * this.resolution,
             this.random.getFloat() * heightMap.yValues * this.resolution,
             heightMap);
-    }
 
     heightMap.blur(this.parameters.postBlur);
 };

@@ -69,7 +69,7 @@ Archipelago.prototype.update = function(timeStep) {
 Archipelago.prototype.generateIsland = function() {
     if (this.island)
         this.island.free();
-
-    this.island = new Island(new IslandParameters(), renderer);
+    parameters.seed = Math.floor(Math.random() * 0xFFFFFFFF);
+    this.island = new Island(parameters, renderer);
     this.camera.setIsland(this.island);
 };

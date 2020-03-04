@@ -11,10 +11,10 @@
  * @constructor
  */
 const TerrainParameters = function(
-    width = 25,
-    height = 35,
+    width = 30,
+    height = 30,
     shape = TerrainParameters.SHAPE_CONE,
-    shapePower = 1.55,
+    shapePower = 1.6,
     resolution = .1,
     heightMapParameters = new HeightMapParameters(),
     erosionParameters = new ErosionParameters(),
