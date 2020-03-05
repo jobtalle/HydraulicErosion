@@ -6,7 +6,7 @@
  * @param {Number} [shapePower] A power to apply to shapes
  * @param {Number} [resolution] A height map & mesh grid resolution
  * @param {HeightMapParameters} [heightMapParameters] Parameters for height map generation
- * @param {ErosionParameters} [erosionParameters] Parameters for erosion simulation
+ * @param {ErosionHydraulicParameters} [erosionParameters] Parameters for erosion simulation
  * @param {VolcanoesParameters} [volcanoesParameters] Parameters for volcano generation
  * @constructor
  */
@@ -17,7 +17,7 @@ const TerrainParameters = function(
     shapePower = 1.6,
     resolution = .1,
     heightMapParameters = new HeightMapParameters(),
-    erosionParameters = new ErosionParameters(),
+    erosionParameters = new ErosionHydraulicParameters(),
     volcanoesParameters = new VolcanoesParameters()) {
     this.width = width;
     this.height = height;

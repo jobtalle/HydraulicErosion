@@ -34,7 +34,7 @@ Terrain.prototype.createVolcanoes = function() {
  * Apply erosion to the terrain
  */
 Terrain.prototype.erode = function() {
-    new Erosion(this.parameters.erosionParameters, this.parameters.resolution, this.random).apply(this.heightMap);
+    new ErosionHydraulic(this.parameters.erosionParameters, this.parameters.resolution, this.random).apply(this.heightMap);
 };
 
 /**

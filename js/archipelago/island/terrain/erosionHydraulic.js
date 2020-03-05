@@ -1,11 +1,11 @@
 /**
- * Erosion simulation
- * @param {ErosionParameters} parameters The parameters
+ * ErosionHydraulic simulation
+ * @param {ErosionHydraulicParameters} parameters The parameters
  * @param {Number} resolution The terrain resolution
  * @param {Random} random A randomizer
  * @constructor
  */
-const Erosion = function(parameters, resolution, random) {
+const ErosionHydraulic = function(parameters, resolution, random) {
     this.parameters = parameters;
     this.resolution = resolution;
     this.random = random;
@@ -17,7 +17,7 @@ const Erosion = function(parameters, resolution, random) {
  * @param {Number} y The Y coordinate to start at
  * @param {HeightMap} heightMap The height map to erode
  */
-Erosion.prototype.trace = function(x, y, heightMap) {
+ErosionHydraulic.prototype.trace = function(x, y, heightMap) {
     const ox = (this.random.getFloat() * 2 - 1) * this.parameters.radius * this.resolution;
     const oy = (this.random.getFloat() * 2 - 1) * this.parameters.radius * this.resolution;
     let sediment = 0;
@@ -52,7 +52,7 @@ Erosion.prototype.trace = function(x, y, heightMap) {
  * Apply erosion
  * @param {HeightMap} heightMap The height map to erode
  */
-Erosion.prototype.apply = function(heightMap) {
+ErosionHydraulic.prototype.apply = function(heightMap) {
     const drops = this.parameters.dropsPerCell * (heightMap.xValues - 1) * (heightMap.yValues - 1);
 
     for (let i = 0; i < drops; ++i)

@@ -1,5 +1,5 @@
 /**
- * Parameters for the erosion simulation
+ * Parameters for the hydraulic erosion simulation
  * @param {Number} [dropsPerCell] The number of drops per cell
  * @param {Number} [erosionRate] The rate of soil removal
  * @param {Number} [depositionRate] The percentage of soil that is deposited while eroding
@@ -10,7 +10,7 @@
  * @param {Number} [postBlur] The blur rate which will be applied after erosion
  * @constructor
  */
-const ErosionParameters = function(
+const ErosionHydraulicParameters = function(
     dropsPerCell = .6,
     erosionRate = .033,
     depositionRate = .03,
