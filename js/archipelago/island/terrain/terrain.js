@@ -31,10 +31,23 @@ Terrain.prototype.createVolcanoes = function() {
 };
 
 /**
- * Apply erosion to the terrain
+ * Apply hydraulic erosion to the terrain
  */
-Terrain.prototype.erode = function() {
-    new ErosionHydraulic(this.parameters.erosionParameters, this.parameters.resolution, this.random).apply(this.heightMap);
+Terrain.prototype.erodeHydraulic = function() {
+    new ErosionHydraulic(
+        this.parameters.erosionHydraulicParameters,
+        this.parameters.resolution,
+        this.random).apply(this.heightMap);
+};
+
+/**
+ * Apply coastal erosion to terrain
+ */
+Terrain.prototype.erodeCoastal = function() {
+    new ErosionCoastal(
+        this.parameters.erosionCoastalParameters,
+        this.parameters.resolution,
+        this.random).apply(this.heightMap);
 };
 
 /**

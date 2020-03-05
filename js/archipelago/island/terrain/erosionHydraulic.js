@@ -1,5 +1,5 @@
 /**
- * ErosionHydraulic simulation
+ * Hydraulic erosion simulation
  * @param {ErosionHydraulicParameters} parameters The parameters
  * @param {Number} resolution The terrain resolution
  * @param {Random} random A randomizer
@@ -15,7 +15,7 @@ const ErosionHydraulic = function(parameters, resolution, random) {
  * Let a droplet erode the height map
  * @param {Number} x The X coordinate to start at
  * @param {Number} y The Y coordinate to start at
- * @param {HeightMap} heightMap The height map to erode
+ * @param {HeightMap} heightMap The height map to erodeHydraulic
  */
 ErosionHydraulic.prototype.trace = function(x, y, heightMap) {
     const ox = (this.random.getFloat() * 2 - 1) * this.parameters.radius * this.resolution;

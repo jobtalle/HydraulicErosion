@@ -12,8 +12,9 @@ const Island = function(parameters, renderer) {
     this.genQueue = [
         () => this.terrain = new Terrain(parameters.terrainParameters, this.random),
         () => this.terrain.createHeightMap(),
+        () => this.terrain.erodeCoastal(),
         () => this.terrain.createVolcanoes(),
-        () => this.terrain.erode(),
+        () => this.terrain.erodeHydraulic(),
         () => this.terrain.createModel(renderer)
     ];
 };
