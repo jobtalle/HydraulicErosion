@@ -7,17 +7,19 @@
  * @param {Number} [friction] Droplet friction
  * @param {Number} [radius] The influence radius of a droplet
  * @param {Number} [maxIterations] The maximum number of simulated iterations per drop
+ * @param {Number} [iterationScale] The influence of iteration on erosion effects
  * @param {Number} [postBlur] The blur rate which will be applied after erosion
  * @constructor
  */
 const ErosionHydraulicParameters = function(
-    dropsPerCell = .6,
-    erosionRate = .033,
+    dropsPerCell = .45,
+    erosionRate = .04,
     depositionRate = .03,
     speed = .15,
     friction = .7,
-    radius = 1.2,
-    maxIterations = 150,
+    radius = .8,
+    maxIterations = 80,
+    iterationScale = .04,
     postBlur = 1) {
     this.dropsPerCell = dropsPerCell;
     this.erosionRate = erosionRate;
@@ -26,5 +28,6 @@ const ErosionHydraulicParameters = function(
     this.friction = friction;
     this.radius = radius;
     this.maxIterations = maxIterations;
+    this.iterationScale = iterationScale;
     this.postBlur = postBlur;
 };

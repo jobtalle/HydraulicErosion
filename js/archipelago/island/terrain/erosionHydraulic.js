@@ -32,8 +32,9 @@ ErosionHydraulic.prototype.trace = function(x, y, heightMap) {
         if (surfaceNormal.y === 1)
             break;
 
-        const erosion = this.parameters.erosionRate * (1 - surfaceNormal.y);
         const deposit = sediment * this.parameters.depositionRate * surfaceNormal.y;
+        const erosion = this.parameters.erosionRate * (1 - surfaceNormal.y) *
+            Math.min(1, i * this.parameters.iterationScale);
 
         heightMap.change(xp, yp,deposit - erosion);
 

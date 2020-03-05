@@ -10,7 +10,7 @@
 const VolcanoesParameters = function(
     volcanoThreshold = 3,
     volcanoThresholdAmplitude = 2,
-    volcanoThresholdScale = .3,
+    volcanoThresholdScale = .2,
     volcanoMaxDepth = .5,
     volcanoCraterScale = .35) {
     this.volcanoThreshold = volcanoThreshold;
