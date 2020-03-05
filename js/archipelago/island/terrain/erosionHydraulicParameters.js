@@ -19,8 +19,7 @@ const ErosionHydraulicParameters = function(
     friction = .7,
     radius = .8,
     maxIterations = 80,
-    iterationScale = .04,
-    postBlur = 1) {
+    iterationScale = .04) {
     this.dropsPerCell = dropsPerCell;
     this.erosionRate = erosionRate;
     this.depositionRate = depositionRate;
@@ -29,5 +28,4 @@ const ErosionHydraulicParameters = function(
     this.radius = radius;
     this.maxIterations = maxIterations;
     this.iterationScale = iterationScale;
-    this.postBlur = postBlur;
 };

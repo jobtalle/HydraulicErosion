@@ -22,6 +22,7 @@ const HeightMap = function(
     this.shape = shape;
     this.random = random;
     this.values = new Array(xValues * yValues);
+    this.sampler = new GridSampler(this.xValues, this.yValues, this.values, 1 / resolution);
     this.maxHeight = 0;
 
     this.generate();
@@ -97,87 +98,6 @@ HeightMap.prototype.generate = function() {
 };
 
 /**
- * Add an amount to a single value index
- * @param {Number} xIndex The X index
- * @param {Number} yIndex The Y index
- * @param {Number} amount The amount of change
- */
-HeightMap.prototype.changePoint = function(xIndex, yIndex, amount) {
-    const index = xIndex + this.xValues * yIndex;
-
-    this.values[index] += Math.max(-this.values[index], amount);
-};
-
-/**
- * Return the height value from a single point
- * @param {Number} xIndex The X index
- * @param {Number} yIndex The Y index
- * @return {Number} The height value at the given point
- */
-HeightMap.prototype.getPoint = function(xIndex, yIndex) {
-    return this.values[xIndex + yIndex * this.xValues];
-};
-
-/**
- * Apply gaussian blur to the height values
- * @param {Number} amount The amount of blur in the range [0, 1]
- */
-HeightMap.prototype.blur = function(amount) {
-    const newValues = new Array((this.xValues - 2) * (this.yValues - 2));
-
-    for (let y = 1; y < this.yValues - 1; ++y) for (let x = 1; x < this.xValues - 1; ++x) {
-        newValues[x - 1 + (y - 1) * (this.xValues - 2)] =
-            (
-                this.getPoint(x - 1, y) +
-                this.getPoint(x, y - 1) +
-                this.getPoint(x + 1, y) +
-                this.getPoint(x, y + 1)
-            ) * .125 +
-            (
-                this.getPoint(x - 1, y -1) +
-                this.getPoint(x + 1, y - 1) +
-                this.getPoint(x + 1, y + 1) +
-                this.getPoint(x - 1, y + 1)
-            ) * .0625 +
-            this.values[x + y * this.xValues] * .25;
-    }
-
-    for (let y = 1; y < this.yValues - 1; ++y) for (let x = 1; x < this.xValues - 1; ++x)
-            this.changePoint(x, y, amount * (newValues[x - 1 + (y - 1) * (this.xValues - 2)] - this.getPoint(x, y)));
-};
-
-/**
- * Sample terrain height
- * @param {Number} x The X coordinate
- * @param {Number} y The Y coordinate
- * @returns {Number} The height at this point
- */
-HeightMap.prototype.sampleHeight = function(x, y) {
-    if (x < 0 || y < 0)
-        return 0;
-
-    x /= this.resolution;
-    y /= this.resolution;
-
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-
-    if (xi >= this.xValues - 1 || yi >= this.yValues - 1)
-        return 0;
-
-    const fx = x - xi;
-    const fy = y - yi;
-    const ylu = this.values[xi + yi * this.xValues];
-    const yld = this.values[xi + (yi + 1) * this.xValues];
-    const yru = this.values[xi + 1 + yi * this.xValues];
-    const yrd = this.values[xi + 1 + (yi + 1) * this.xValues];
-    const yl = ylu + (yld - ylu) * fy;
-    const yr = yru + (yrd - yru) * fy;
-
-    return yl + (yr - yl) * fx;
-};
-
-/**
  * Sample the terrain normal
  * @param {Number} x The X coordinate
  * @param {Number} y The Y coordinate
@@ -185,42 +105,14 @@ HeightMap.prototype.sampleHeight = function(x, y) {
  */
 HeightMap.prototype.sampleNormal = function(x, y) {
     const doubleRadius = -(this.resolution + this.resolution);
-    const left = this.sampleHeight(x - this.resolution, y);
-    const top = this.sampleHeight(x, y - this.resolution);
-    const right = this.sampleHeight(x + this.resolution, y);
-    const bottom = this.sampleHeight(x, y + this.resolution);
+    const left = this.sampler.sample(x - this.resolution, y);
+    const top = this.sampler.sample(x, y - this.resolution);
+    const right = this.sampler.sample(x + this.resolution, y);
+    const bottom = this.sampler.sample(x, y + this.resolution);
 
     return new Vector(
         doubleRadius * (right - left),
         doubleRadius * doubleRadius,
         doubleRadius * (bottom - top)
     ).normalize();
-};
-
-/**
- * Change the height at a certain point
- * @param {Number} x The X coordinate
- * @param {Number} y The Y coordinate
- * @param {Number} amount The amount of change
- */
-HeightMap.prototype.change = function(x, y, amount) {
-    if (x < 0 || y < 0)
-        return;
-
-    x /= this.resolution;
-    y /= this.resolution;
-
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-
-    if (xi >= this.xValues - 1 || yi >= this.yValues - 1)
-        return;
-
-    const fx = x - xi;
-    const fy = y - yi;
-
-    this.changePoint(xi, yi, fx * fy * amount);
-    this.changePoint(xi + 1, yi, (1 - fx) * fy * amount);
-    this.changePoint(xi, yi + 1, fx * (1 - fy) * amount);
-    this.changePoint(xi + 1, yi + 1, (1 - fx) * (1 - fy) * amount);
 };

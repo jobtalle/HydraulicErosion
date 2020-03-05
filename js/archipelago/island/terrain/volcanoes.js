@@ -23,13 +23,13 @@ Volcanoes.prototype.apply = function(heightMap) {
         heightMap.maxHeight - this.parameters.volcanoMaxDepth * (1 / this.parameters.volcanoCraterScale));
 
     for (let y = 0; y < heightMap.yValues; ++y) for (let x = 0; x < heightMap.xValues; ++x) {
-        const height = heightMap.getPoint(x, y);
+        const height = heightMap.values[x + y * heightMap.xValues];
         const threshold = (2 * rimNoise.sample(
             x * heightMap.resolution * this.parameters.volcanoThresholdScale,
             y * heightMap.resolution * this.parameters.volcanoThresholdScale) - .5) *
             this.parameters.volcanoThresholdAmplitude + volcanoThreshold;
 
         if (height > threshold)
-            heightMap.changePoint(x, y, -(height - threshold) * (1 + this.parameters.volcanoCraterScale));
+            heightMap.values[x + y * heightMap.xValues] -= (height - threshold) * (1 + this.parameters.volcanoCraterScale);
     }
 };

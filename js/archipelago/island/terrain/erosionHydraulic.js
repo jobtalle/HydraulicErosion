@@ -36,7 +36,7 @@ ErosionHydraulic.prototype.trace = function(x, y, heightMap) {
         const erosion = this.parameters.erosionRate * (1 - surfaceNormal.y) *
             Math.min(1, i * this.parameters.iterationScale);
 
-        heightMap.change(xp, yp,deposit - erosion);
+        heightMap.sampler.change(xp, yp, deposit - erosion);
 
         vx = this.parameters.friction * vx + surfaceNormal.x * this.parameters.speed * this.resolution;
         vy = this.parameters.friction * vy + surfaceNormal.z * this.parameters.speed * this.resolution;
@@ -62,5 +62,5 @@ ErosionHydraulic.prototype.apply = function(heightMap) {
             this.random.getFloat() * heightMap.yValues * this.resolution,
             heightMap);
 
-    heightMap.blur(this.parameters.postBlur);
+    heightMap.sampler.blur();
 };
