@@ -114,10 +114,17 @@ SystemTerrain.HeightMap.prototype.build = function() {
         const iRightTop = iLeftTop + 1;
         const iLeftBottom = x + (y + 1) * this.xValues;
         const iRightBottom = iLeftBottom + 1;
+        const hLeftTop = vertices[iLeftTop * 6 + 1];
+        const hRightTop = vertices[iRightTop * 6 + 1];
+        const hLeftBottom = vertices[iLeftBottom * 6 + 1];
+        const hRightBottom = vertices[iRightBottom * 6 + 1];
+
+        if (hLeftTop === 0 && hRightTop === 0 && hLeftBottom === 0 && hRightBottom === 0)
+            continue;
 
         if (
-            Math.abs(vertices[iRightBottom * 6 + 1] - vertices[iLeftTop * 6 + 1]) >
-            Math.abs(vertices[iRightTop * 6 + 1] - vertices[iLeftBottom * 6 + 1]))
+            Math.abs(hRightBottom - hLeftTop) >
+            Math.abs(hRightTop - hLeftBottom))
             indices.push(
                 iLeftBottom,
                 iLeftTop,

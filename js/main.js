@@ -41,7 +41,7 @@ const loopFunction = () => {
 window.onresize = resize;
 window.onkeydown = event => archipelago.pressKey(event.key);
 window.onmousemove = event => archipelago.mouseMove(event.clientX, event.clientY);
-window.onmousewheel = event => archipelago.mouseScroll(Math.sign(event.deltaY));
+window.onwheel = event => archipelago.mouseScroll(Math.sign(event.deltaY));
 window.onmousedown = event => {
     if (event.button === 0)
         archipelago.mousePress(event.clientX, event.clientY);

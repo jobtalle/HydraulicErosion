@@ -8,11 +8,11 @@
  * @constructor
  */
 const VolcanoesParameters = function(
-    volcanoThreshold = 3,
+    volcanoThreshold = 2.5,
     volcanoThresholdAmplitude = 2,
     volcanoThresholdScale = .2,
     volcanoMaxDepth = .5,
-    volcanoCraterScale = .35) {
+    volcanoCraterScale = .5) {
     this.volcanoThreshold = volcanoThreshold;
     this.volcanoThresholdAmplitude = volcanoThresholdAmplitude;
     this.volcanoThresholdScale = volcanoThresholdScale;

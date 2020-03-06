@@ -22,13 +22,12 @@ ErosionCoastal.prototype.apply = function(heightMap) {
 
     for (let y = 0; y < heightMap.yValues; ++y) for (let x = 0; x < heightMap.xValues; ++x) {
         const index = x + y * heightMap.xValues;
-        const power = this.parameters.power;
         const threshold = this.parameters.waveHeightMin + noise.sample(
             x * this.resolution * this.parameters.noiseScale,
             y * this.resolution * this.parameters.noiseScale) *
             (this.parameters.waveHeightMax - this.parameters.waveHeightMin);
 
         if (heightMap.values[index] < threshold)
-            heightMap.values[index] *= (heightMap.values[index] / threshold) ** power;
+            heightMap.values[index] *= (heightMap.values[index] / threshold) ** this.parameters.power;
     }
 };
