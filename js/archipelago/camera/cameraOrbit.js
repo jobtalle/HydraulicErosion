@@ -25,7 +25,7 @@ CameraOrbit.prototype.RADIUS_SPEED = .12;
  */
 CameraOrbit.prototype.setIsland = function(island) {
     this.center.x = island.parameters.terrainParameters.width * .5;
-    this.center.y = 0;
+    this.center.y = island.parameters.terrainParameters.water;
     this.center.z = island.parameters.terrainParameters.height * .5;
 };
 
