@@ -38,8 +38,14 @@ Renderer.prototype.draw = function() {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
     this.systemTerrain.draw(this.matrixBuffer);
-    this.systemOcean.draw(this.matrixBuffer);
     this.systemGeometry.draw(this.matrixBuffer);
+
+    this.gl.enable(this.gl.BLEND);
+    this.gl.blendFuncSeparate(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA, this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
+
+    this.systemOcean.draw(this.matrixBuffer);
+
+    this.gl.disable(this.gl.BLEND);
 };
 
 /**

@@ -15,7 +15,8 @@ const Island = function(parameters, renderer) {
         () => this.terrain.erodeCoastal(),
         () => this.terrain.createVolcanoes(),
         () => this.terrain.erodeHydraulic(),
-        () => this.terrain.createModel(renderer)
+        () => this.terrain.createModel(renderer),
+        () => this.terrain.createOcean(renderer)
     ];
 };
 

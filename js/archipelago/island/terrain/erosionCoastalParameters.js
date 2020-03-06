@@ -7,10 +7,10 @@
  * @constructor
  */
 const ErosionCoastalParameters = function(
-    waveHeightMin = .2,
+    waveHeightMin = .4,
     waveHeightMax = 1.2,
     noiseScale = .5,
-    power = 4) {
+    power = 3) {
     this.waveHeightMin = waveHeightMin;
     this.waveHeightMax = waveHeightMax;
     this.noiseScale = noiseScale;

@@ -8,11 +8,10 @@
  * @param {Number} [radius] The influence radius of a droplet
  * @param {Number} [maxIterations] The maximum number of simulated iterations per drop
  * @param {Number} [iterationScale] The influence of iteration on erosion effects
- * @param {Number} [postBlur] The blur rate which will be applied after erosion
  * @constructor
  */
 const ErosionHydraulicParameters = function(
-    dropsPerCell = .45,
+    dropsPerCell = .4,
     erosionRate = .04,
     depositionRate = .03,
     speed = .15,

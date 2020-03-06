@@ -9,6 +9,7 @@ const Terrain = function(parameters, random) {
     this.parameters = parameters;
     this.model = null;
     this.heightMap = null;
+    this.ocean = null;
 };
 
 /**
@@ -76,9 +77,25 @@ Terrain.prototype.createModel = function(renderer) {
 };
 
 /**
+ * Create an ocean model and add it to the rendered scene
+ * @param {Renderer} renderer The renderer
+ */
+Terrain.prototype.createOcean = function(renderer) {
+    this.ocean = renderer.systemOcean.makeHeightMap(
+        this.heightMap.xValues,
+        this.heightMap.yValues,
+        this.heightMap.values,
+        this.parameters.resolution,
+        this.parameters.water);
+};
+
+/**
  * Free all resources occupied by the terrain
  */
 Terrain.prototype.free = function() {
     if (this.model)
         this.model.free();
+
+    if (this.ocean)
+        this.ocean.free();
 };
