@@ -6,7 +6,7 @@
  * @param {Number} yValues The number of Y values
  * @param {Array} values An array containing all height values
  * @param {Number} resolution The spacing between the values
- * @param {Number} height The water height
+ * @param {Number} waterHeight The water height
  * @constructor
  */
 SystemOcean.HeightMap = function(
@@ -16,17 +16,19 @@ SystemOcean.HeightMap = function(
     yValues,
     values,
     resolution,
-    height) {
+    waterHeight) {
     this.container = container;
     this.gl = gl;
     this.xValues = xValues;
     this.yValues = yValues;
     this.values = values;
     this.resolution = resolution;
-    this.height = height;
+    this.waterHeight = waterHeight;
     this.vertices = gl.createBuffer();
     this.indices = gl.createBuffer();
     this.indexCount = 0;
+
+    this.distanceField = new SystemOcean.DistanceField(gl, xValues, yValues, values, waterHeight);
 
     this.container.push(this);
     this.build();
@@ -57,10 +59,10 @@ SystemOcean.HeightMap.prototype.build = function() {
         const hRightBottom = this.values[iRightBottom];
 
         // TODO: Add maximum wave height to height threshold
-        if (hLeftTop > this.height &&
-            hRightTop > this.height &&
-            hLeftBottom > this.height &&
-            hRightBottom > this.height)
+        if (hLeftTop > this.waterHeight &&
+            hRightTop > this.waterHeight &&
+            hLeftBottom > this.waterHeight &&
+            hRightBottom > this.waterHeight)
             continue;
 
         indices.push(
@@ -85,7 +87,7 @@ SystemOcean.HeightMap.prototype.build = function() {
  * @param {Shader} shader The active shader
  */
 SystemOcean.HeightMap.prototype.draw = function(shader) {
-    this.gl.uniform1f(shader.uHeight, this.height);
+    this.gl.uniform1f(shader.uHeight, this.waterHeight);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertices);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
@@ -100,6 +102,8 @@ SystemOcean.HeightMap.prototype.draw = function(shader) {
  * Free this height map
  */
 SystemOcean.HeightMap.prototype.free = function() {
+    this.distanceField.free();
+
     this.gl.deleteBuffer(this.vertices);
     this.gl.deleteBuffer(this.indices);
     this.container.splice(this.container.indexOf(this), 1);
