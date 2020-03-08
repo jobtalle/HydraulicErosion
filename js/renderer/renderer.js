@@ -34,6 +34,7 @@ Renderer.prototype.updateMatrices = function() {
  * Draw the scene in this renderer
  */
 Renderer.prototype.draw = function() {
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, this.width, this.height);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 

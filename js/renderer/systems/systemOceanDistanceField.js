@@ -36,6 +36,14 @@ SystemOcean.DistanceField = function(
         this.gl.RGBA,
         this.gl.UNSIGNED_BYTE,
         new Uint8Array(this.width * this.height << 2));
+
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer);
+    this.gl.framebufferTexture2D(
+        this.gl.FRAMEBUFFER,
+        this.gl.COLOR_ATTACHMENT0,
+        this.gl.TEXTURE_2D,
+        this.texture,
+        0);
 };
 
 SystemOcean.DistanceField.prototype.RESOLUTION = 8;
