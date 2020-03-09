@@ -186,10 +186,6 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.deleteBuffer(quad);
 
-    // this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[current].texture);
-    // this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-    // this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-
     return pairs[current].texture;
 };
 
