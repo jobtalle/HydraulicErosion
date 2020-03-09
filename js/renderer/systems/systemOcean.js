@@ -13,6 +13,12 @@ const SystemOcean = function(gl) {
         SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_FRAGMENT,
         ["height", "size"],
         ["vertex"]);
+    this.shaderVoronoi = new Shader(
+        gl,
+        SystemOcean.DistanceField.prototype.SHADER_VORONOI_VERTEX,
+        SystemOcean.DistanceField.prototype.SHADER_VORONOI_FRAGMENT,
+        ["source", "size", "step"],
+        ["vertex"]);
 };
 
 SystemOcean.prototype.SHADER_VERTEX = `
@@ -71,7 +77,8 @@ SystemOcean.prototype.makeHeightMap = function(
         resolution,
         terrainHeightMap,
         height,
-        this.shaderThreshold);
+        this.shaderThreshold,
+        this.shaderVoronoi);
 };
 
 /**

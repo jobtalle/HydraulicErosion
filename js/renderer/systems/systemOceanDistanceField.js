@@ -8,6 +8,7 @@
  * @param {Number} waterHeight The water height
  * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
  * @param {Shader} shaderThreshold The height map threshold shader
+ * @param {Shader} shaderVoronoi The voronoi shader
  * @constructor
  */
 SystemOcean.DistanceField = function(
@@ -18,7 +19,8 @@ SystemOcean.DistanceField = function(
     resolution,
     waterHeight,
     terrainHeightMap,
-    shaderThreshold) {
+    shaderThreshold,
+    shaderVoronoi) {
     this.gl = gl;
     this.xValues = xValues;
     this.yValues = yValues;
@@ -28,7 +30,7 @@ SystemOcean.DistanceField = function(
     this.resolution = resolution;
     this.waterHeight = waterHeight;
     this.terrainHeightMap = terrainHeightMap;
-    this.texture = this.build(shaderThreshold);
+    this.texture = this.build(shaderThreshold, shaderVoronoi);
 };
 
 SystemOcean.DistanceField.prototype.RESOLUTION = 8;
@@ -40,11 +42,13 @@ uniform mediump vec2 size;
 
 attribute mediump vec3 vertex;
 
+varying mediump vec2 uv;
 varying mediump float y;
 
 void main() {
+  uv = vertex.xz / size;
   y = vertex.y;
-  gl_Position = vec4(2.0 * vertex.xz / size - vec2(1.0), 0.0, 1.0);
+  gl_Position = vec4(2.0 * uv - vec2(1.0), 0.0, 1.0);
 }
 `;
 
@@ -53,28 +57,80 @@ SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_FRAGMENT = `
 
 uniform mediump float height;
 
+varying mediump vec2 uv;
 varying mediump float y;
 
 void main() {
   if (y > height)
-    gl_FragColor = vec4(1.0);
+    gl_FragColor = vec4(uv, 0.0, 1.0);
   else
     gl_FragColor = vec4(0.0);
+}
+`;
+
+SystemOcean.DistanceField.prototype.SHADER_VORONOI_VERTEX = `
+#version 100
+
+attribute mediump vec2 vertex;
+
+varying mediump vec2 uv;
+
+void main() {
+  uv = vertex;
+  gl_Position = vec4(2.0 * vertex - vec2(1.0), 0.0, 1.0);
+}
+`;
+
+SystemOcean.DistanceField.prototype.SHADER_VORONOI_FRAGMENT = `
+#version 100
+
+uniform sampler2D source;
+uniform mediump vec2 size;
+uniform int step;
+
+varying mediump vec2 uv;
+
+void main() {
+  lowp float bestDistance = 10000.0;
+  lowp vec4 bestPixel = vec4(0.0);
+  
+  for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
+    lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
+    lowp float distance = length(pixel.xy - uv);
+    
+    if (pixel.a != 0.0 && distance < bestDistance) {
+      bestDistance = distance;
+      bestPixel = pixel;
+    }
+  }
+  
+  gl_FragColor = bestPixel;
 }
 `;
 
 /**
  * Build the distance field
  * @param {Shader} shaderThreshold The height map threshold shader
+ * @param {Shader} shaderVoronoi The voronoi shader
  * @returns {WebGLTexture} The distance field texture
  */
-SystemOcean.DistanceField.prototype.build = function(shaderThreshold) {
+SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoronoi) {
+    const quad = this.gl.createBuffer();
     const pairs = [
         this.createTexturePair(this.width, this.height),
         this.createTexturePair(this.width, this.height)
     ];
-
+    let step = 1;
     let current = 0;
+
+    while (step < Math.max(this.width, this.height))
+        step <<= 1;
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, quad);
+    this.gl.bufferData(
+        this.gl.ARRAY_BUFFER,
+        new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]),
+        this.gl.STATIC_DRAW);
 
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, pairs[current].framebuffer);
     this.gl.viewport(0, 0, this.width, this.height);
@@ -95,13 +151,39 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold) {
 
     this.gl.drawElements(this.gl.TRIANGLES, this.terrainHeightMap.indexCount, this.gl.UNSIGNED_INT, 0);
 
-    // Loopity loop
+    shaderVoronoi.use();
+
+    this.gl.uniform1i(shaderVoronoi.uSource, 0);
+    this.gl.uniform2f(shaderVoronoi.uSize, this.width, this.height);
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, quad);
+
+    this.gl.enableVertexAttribArray(shaderVoronoi.aVertex);
+    this.gl.vertexAttribPointer(shaderVoronoi.aVertex, 2, this.gl.FLOAT, false, 8, 0);
+
+    this.gl.activeTexture(this.gl.TEXTURE0);
+
+    while (step >= 1) {
+        current = 1 - current;
+
+        this.gl.uniform1i(shaderVoronoi.uStep, step);
+
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, pairs[current].framebuffer);
+        this.gl.viewport(0, 0, this.width, this.height);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[1 - current].texture);
+
+        this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
+
+        step >>= 1;
+    }
 
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 
     this.gl.deleteFramebuffer(pairs[current].framebuffer);
     this.gl.deleteFramebuffer(pairs[1 - current].framebuffer);
     this.gl.deleteTexture(pairs[1 - current].texture);
+
+    this.gl.deleteBuffer(quad);
 
     return pairs[current].texture;
 };
@@ -131,7 +213,7 @@ SystemOcean.DistanceField.prototype.createTexturePair = function(width, height) 
         0,
         this.gl.RGBA,
         this.gl.UNSIGNED_BYTE,
-        new Uint8Array(width * height << 2).fill(100));
+        new Uint8Array(width * height << 2));
 
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, pair.framebuffer);
     this.gl.framebufferTexture2D(
