@@ -102,6 +102,6 @@ GridSampler.prototype.blur = function() {
             this.values[x + y * this.width] * .25;
     }
 
-    for (let y = 1; y < this.width - 1; ++y) for (let x = 1; x < this.height - 1; ++x)
+    for (let y = 1; y < this.height - 1; ++y) for (let x = 1; x < this.width - 1; ++x)
         this.values[x + y * this.width] = newValues[x - 1 + (y - 1) * (this.width - 2)];
 };
