@@ -86,6 +86,7 @@ Terrain.prototype.createOcean = function(renderer) {
         this.heightMap.yValues,
         this.heightMap.values,
         this.parameters.resolution,
+        this.model,
         this.parameters.water);
 };
 

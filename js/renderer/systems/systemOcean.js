@@ -5,7 +5,13 @@ const SystemOcean = function(gl) {
         gl,
         this.SHADER_VERTEX,
         this.SHADER_FRAGMENT,
-        ["mvp", "height"],
+        ["mvp", "size", "height", "distanceField"],
+        ["vertex"]);
+    this.shaderThreshold = new Shader(
+        gl,
+        SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX,
+        SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_FRAGMENT,
+        ["height", "size"],
         ["vertex"]);
 };
 
@@ -13,11 +19,15 @@ SystemOcean.prototype.SHADER_VERTEX = `
 #version 100
 
 uniform mat4 mvp;
+uniform mediump vec2 size;
 uniform mediump float height;
 
 attribute mediump vec2 vertex;
 
+varying mediump vec2 uv;
+
 void main() {
+  uv = vertex.xy / size;
   gl_Position = mvp * vec4(vertex.x, height, vertex.y, 1.0);
 }
 `;
@@ -25,8 +35,13 @@ void main() {
 SystemOcean.prototype.SHADER_FRAGMENT = `
 #version 100
 
+uniform sampler2D distanceField;
+
+varying mediump vec2 uv;
+
 void main() {
-  gl_FragColor = vec4(0.2, 0.2, 0.9, 0.5);
+  gl_FragColor = texture2D(distanceField, uv);
+  // gl_FragColor = vec4(0.2, 0.2, 0.9, 0.5);
 }
 `;
 
@@ -36,6 +51,7 @@ void main() {
  * @param {Number} yValues The number of Y values
  * @param {Array} values An array containing all height values
  * @param {Number} resolution The spacing between the values
+ * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
  * @param {Number} height The water height
  * @returns {SystemOcean.HeightMap} The terrain object
  */
@@ -44,8 +60,18 @@ SystemOcean.prototype.makeHeightMap = function(
     yValues,
     values,
     resolution,
+    terrainHeightMap,
     height) {
-    return new SystemOcean.HeightMap(this.heightMaps, this.gl, xValues, yValues, values, resolution, height);
+    return new SystemOcean.HeightMap(
+        this.heightMaps,
+        this.gl,
+        xValues,
+        yValues,
+        values,
+        resolution,
+        terrainHeightMap,
+        height,
+        this.shaderThreshold);
 };
 
 /**

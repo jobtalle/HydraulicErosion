@@ -6,7 +6,9 @@
  * @param {Number} yValues The number of Y values
  * @param {Array} values An array containing all height values
  * @param {Number} resolution The spacing between the values
+ * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
  * @param {Number} waterHeight The water height
+ * @param {Shader} shaderThreshold The height map threshold shader
  * @constructor
  */
 SystemOcean.HeightMap = function(
@@ -16,7 +18,9 @@ SystemOcean.HeightMap = function(
     yValues,
     values,
     resolution,
-    waterHeight) {
+    terrainHeightMap,
+    waterHeight,
+    shaderThreshold) {
     this.container = container;
     this.gl = gl;
     this.xValues = xValues;
@@ -28,10 +32,18 @@ SystemOcean.HeightMap = function(
     this.indices = gl.createBuffer();
     this.indexCount = 0;
 
-    this.distanceField = new SystemOcean.DistanceField(gl, xValues, yValues, values, waterHeight);
+    this.build();
+    this.distanceField = new SystemOcean.DistanceField(
+        gl,
+        xValues,
+        yValues,
+        values,
+        resolution,
+        waterHeight,
+        terrainHeightMap,
+        shaderThreshold);
 
     this.container.push(this);
-    this.build();
 };
 
 /**
@@ -58,12 +70,12 @@ SystemOcean.HeightMap.prototype.build = function() {
         const hLeftBottom = this.values[iLeftBottom];
         const hRightBottom = this.values[iRightBottom];
 
-        // TODO: Add maximum wave height to height threshold
-        if (hLeftTop > this.waterHeight &&
-            hRightTop > this.waterHeight &&
-            hLeftBottom > this.waterHeight &&
-            hRightBottom > this.waterHeight)
-            continue;
+        // // TODO: Add maximum wave height to height threshold
+        // if (hLeftTop > this.waterHeight &&
+        //     hRightTop > this.waterHeight &&
+        //     hLeftBottom > this.waterHeight &&
+        //     hRightBottom > this.waterHeight)
+        //     continue;
 
         indices.push(
             iLeftBottom,
@@ -87,7 +99,12 @@ SystemOcean.HeightMap.prototype.build = function() {
  * @param {Shader} shader The active shader
  */
 SystemOcean.HeightMap.prototype.draw = function(shader) {
+    this.gl.uniform2f(shader.uSize, (this.xValues - 1) * this.resolution, (this.yValues - 1) * this.resolution);
     this.gl.uniform1f(shader.uHeight, this.waterHeight);
+    this.gl.uniform1i(shader.uDistanceField, 0);
+
+    this.gl.activeTexture(this.gl.TEXTURE0);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.distanceField.texture);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertices);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
