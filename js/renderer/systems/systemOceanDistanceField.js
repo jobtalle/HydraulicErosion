@@ -96,7 +96,7 @@ void main() {
   
   for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
     lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
-    lowp vec2 delta = pixel.xy - uv;
+    lowp vec2 delta = (pixel.xy - uv) * size;
     lowp float distance = dot(delta, delta);
     
     if (pixel.a != 0.0 && distance < bestDistance) {
@@ -186,9 +186,9 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.deleteBuffer(quad);
 
-    this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[current].texture);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+    // this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[current].texture);
+    // this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+    // this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
     return pairs[current].texture;
 };

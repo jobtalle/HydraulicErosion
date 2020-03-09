@@ -14,7 +14,7 @@
  */
 const TerrainParameters = function(
     width = 25,
-    height = 35,
+    height = 25,
     water = .5,
     shape = TerrainParameters.SHAPE_CONE,
     shapePower = 1.6,

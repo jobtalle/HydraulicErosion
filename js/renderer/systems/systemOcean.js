@@ -42,12 +42,17 @@ SystemOcean.prototype.SHADER_FRAGMENT = `
 #version 100
 
 uniform sampler2D distanceField;
+uniform mediump vec2 size;
 
 varying mediump vec2 uv;
 
 void main() {
+  lowp float shoreDistance = length((texture2D(distanceField, uv).xy - uv) * size);
+  
   gl_FragColor = texture2D(distanceField, uv);
-  // gl_FragColor = vec4(0.2, 0.2, 0.9, 0.5);
+  
+  if (shoreDistance > 0.4 && shoreDistance < 0.8)
+    gl_FragColor = vec4(1.0);
 }
 `;
 
