@@ -91,12 +91,13 @@ uniform int step;
 varying mediump vec2 uv;
 
 void main() {
-  lowp float bestDistance = 10000.0;
+  lowp float bestDistance = 16000000.0;
   lowp vec4 bestPixel = vec4(0.0);
   
   for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
     lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
-    lowp float distance = length(pixel.xy - uv);
+    lowp vec2 delta = pixel.xy - uv;
+    lowp float distance = dot(delta, delta);
     
     if (pixel.a != 0.0 && distance < bestDistance) {
       bestDistance = distance;
@@ -163,7 +164,7 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.activeTexture(this.gl.TEXTURE0);
 
-    while (step >= 1) {
+    while (step !== 0) {
         current = 1 - current;
 
         this.gl.uniform1i(shaderVoronoi.uStep, step);
@@ -185,6 +186,10 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.deleteBuffer(quad);
 
+    this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[current].texture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+
     return pairs[current].texture;
 };
 
@@ -200,8 +205,8 @@ SystemOcean.DistanceField.prototype.createTexturePair = function(width, height) 
     };
 
     this.gl.bindTexture(this.gl.TEXTURE_2D, pair.texture);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
     this.gl.texImage2D(
