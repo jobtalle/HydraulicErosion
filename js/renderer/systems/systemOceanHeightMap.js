@@ -74,11 +74,11 @@ SystemOcean.HeightMap.prototype.build = function() {
         const hRightBottom = this.values[iRightBottom];
 
         // // TODO: Add maximum wave height to height threshold
-        // if (hLeftTop > this.waterHeight &&
-        //     hRightTop > this.waterHeight &&
-        //     hLeftBottom > this.waterHeight &&
-        //     hRightBottom > this.waterHeight)
-        //     continue;
+        if (hLeftTop > this.waterHeight &&
+            hRightTop > this.waterHeight &&
+            hLeftBottom > this.waterHeight &&
+            hRightBottom > this.waterHeight)
+            continue;
 
         indices.push(
             iLeftBottom,
