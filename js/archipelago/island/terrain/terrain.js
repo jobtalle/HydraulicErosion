@@ -94,9 +94,13 @@ Terrain.prototype.createOcean = function(renderer) {
  * Free all resources occupied by the terrain
  */
 Terrain.prototype.free = function() {
-    if (this.model)
+    if (this.model) {
         this.model.free();
+        this.model = null;
+    }
 
-    if (this.ocean)
+    if (this.ocean) {
         this.ocean.free();
+        this.ocean = null;
+    }
 };

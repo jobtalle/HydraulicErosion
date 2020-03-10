@@ -96,7 +96,7 @@ void main() {
   
   for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
     lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
-    lowp vec2 delta = (pixel.xy - uv) * size;
+    lowp vec2 delta = (pixel.xy - uv);
     lowp float distance = dot(delta, delta);
     
     if (pixel.a != 0.0 && distance < bestDistance) {
@@ -149,6 +149,9 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.enableVertexAttribArray(shaderThreshold.aVertex);
     this.gl.vertexAttribPointer(shaderThreshold.aVertex, 3, this.gl.FLOAT, false, 24, 0);
+
+    // Disable attributes that were used by normal terrain rendering
+    this.gl.disableVertexAttribArray(1);
 
     this.gl.drawElements(this.gl.TRIANGLES, this.terrainHeightMap.indexCount, this.gl.UNSIGNED_INT, 0);
 

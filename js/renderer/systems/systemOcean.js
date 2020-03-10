@@ -36,13 +36,11 @@ varying lowp float shoreDistance;
 
 void main() {
   uv = vertex.xy / size;
-  shoreDistance = length((texture2D(distanceField, uv).xy - uv) * size);
   
   mediump float waveHeight = height;
   
-  if (shoreDistance > 0.4 && shoreDistance < 0.8)
-    waveHeight += .3 * (0.5 - 0.5 * cos(6.283185 * (shoreDistance - 0.4) / 0.4))
-    ;
+  // if (shoreDistance > 0.4 && shoreDistance < 0.8)
+  //   waveHeight += .3 * (0.5 - 0.5 * cos(6.283185 * (shoreDistance - 0.4) / 0.4));
   
   gl_Position = mvp * vec4(vertex.x, waveHeight, vertex.y, 1.0);
 }
@@ -52,11 +50,14 @@ SystemOcean.prototype.SHADER_FRAGMENT = `
 #version 100
 
 uniform sampler2D distanceField;
+uniform mediump vec2 size;
 
 varying lowp vec2 uv;
 varying lowp float shoreDistance;
 
 void main() {
+  mediump float shoreDistance = length((texture2D(distanceField, uv).xy - uv) * size);
+
   gl_FragColor = texture2D(distanceField, uv);
   
   if (shoreDistance > 0.4 && shoreDistance < 0.8)
