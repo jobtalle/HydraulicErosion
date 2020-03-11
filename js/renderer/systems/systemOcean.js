@@ -1,11 +1,12 @@
 const SystemOcean = function(gl) {
     this.gl = gl;
     this.heightMaps = [];
+    this.phase = 0;
     this.shader = new Shader(
         gl,
         this.SHADER_VERTEX,
         this.SHADER_FRAGMENT,
-        ["mvp", "height", "distanceField"],
+        ["mvp", "height", "distanceField", "phase"],
         ["vertex", "uv"]);
     this.shaderThreshold = new Shader(
         gl,
@@ -54,6 +55,7 @@ precision mediump float;
 
 uniform sampler2D distanceField;
 uniform vec2 size;
+uniform float phase;
 
 varying vec2 iUv;
 
@@ -62,10 +64,7 @@ void main() {
 
   gl_FragColor = vec4(texture2D(distanceField, iUv).rgb, 0.5);
   
-  if (shoreDistance > 0.8 && shoreDistance < 0.95)
-    gl_FragColor = vec4(1.0);
-
-  if (shoreDistance > 0.05 && shoreDistance < 0.1)
+  if (shoreDistance > (1.0 - phase) && shoreDistance < min(0.999999, (1.0 - phase) + 0.05))
     gl_FragColor = vec4(1.0);
 }
 `;
@@ -101,12 +100,24 @@ SystemOcean.prototype.makeHeightMap = function(
 };
 
 /**
+ * Update the ocean renderer
+ * @param {Number} timeStep Passed time in seconds
+ */
+SystemOcean.prototype.update = function(timeStep) {
+    this.phase += timeStep * .1;
+
+    if (this.phase > 1)
+        --this.phase;
+};
+
+/**
  * Draw the ocean
  * @param {Array} mvp An array containing the values of the MVP matrix
  */
 SystemOcean.prototype.draw = function(mvp) {
     this.shader.use();
     this.gl.uniformMatrix4fv(this.shader.uMvp, false, mvp);
+    this.gl.uniform1f(this.shader.uPhase, this.phase);
 
     for (const heightMap of this.heightMaps)
         heightMap.draw(this.shader);

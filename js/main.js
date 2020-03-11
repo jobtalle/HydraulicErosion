@@ -23,6 +23,7 @@ const resize = () => {
  */
 const update = timeStep => {
     archipelago.update(timeStep);
+    renderer.update(timeStep);
     renderer.draw();
 };
 

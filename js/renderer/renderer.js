@@ -31,6 +31,14 @@ Renderer.prototype.updateMatrices = function() {
 };
 
 /**
+ * Update the renderer
+ * @param {Number} timeStep Passed time in seconds
+ */
+Renderer.prototype.update = function(timeStep) {
+    this.systemOcean.update(timeStep);
+};
+
+/**
  * Draw the scene in this renderer
  */
 Renderer.prototype.draw = function() {
