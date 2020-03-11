@@ -98,6 +98,22 @@ HeightMap.prototype.generate = function() {
 };
 
 /**
+ * Get the terrain width
+ * @returns {Number} The terrain width
+ */
+HeightMap.prototype.getWidth = function() {
+    return (this.xValues - 1) * this.resolution;
+};
+
+/**
+ * Get the terrain height
+ * @returns {Number} The terrain height
+ */
+HeightMap.prototype.getHeight = function() {
+    return (this.yValues - 1) * this.resolution;
+};
+
+/**
  * Sample the terrain normal
  * @param {Number} x The X coordinate
  * @param {Number} y The Y coordinate

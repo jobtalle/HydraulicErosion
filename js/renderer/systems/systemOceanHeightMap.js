@@ -2,11 +2,8 @@
  * Water surrounding a height map
  * @param {Array} container The array in which to store the reference to this height map
  * @param {WebGLRenderingContext} gl The WebGL 1 rendering context
- * @param {Number} xValues The number of X values
- * @param {Number} yValues The number of Y values
- * @param {Array} values An array containing all height values
- * @param {Number} resolution The spacing between the values
  * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
+ * @param {HeightMap} heightMap The height map
  * @param {Number} waterHeight The water height
  * @param {Shader} shaderThreshold The height map threshold shader
  * @param {Shader} shaderVoronoi The voronoi shader
@@ -16,80 +13,92 @@
 SystemOcean.HeightMap = function(
     container,
     gl,
-    xValues,
-    yValues,
-    values,
-    resolution,
     terrainHeightMap,
+    heightMap,
     waterHeight,
     shaderThreshold,
     shaderVoronoi,
     shaderFinal) {
     this.container = container;
     this.gl = gl;
-    this.xValues = xValues;
-    this.yValues = yValues;
-    this.values = values;
-    this.resolution = resolution;
+    this.heightMap = heightMap;
     this.waterHeight = waterHeight;
     this.vertices = gl.createBuffer();
     this.indices = gl.createBuffer();
     this.indexCount = 0;
 
-    this.build();
     this.distanceField = new SystemOcean.DistanceField(
         gl,
-        xValues,
-        yValues,
-        values,
-        resolution,
+        (heightMap.xValues - 1) * heightMap.resolution,
+        (heightMap.yValues - 1) * heightMap.resolution,
         waterHeight,
         terrainHeightMap,
         shaderThreshold,
         shaderVoronoi,
         shaderFinal);
 
+    this.build();
     this.container.push(this);
 };
+
+SystemOcean.HeightMap.prototype.RESOLUTION = .1;
 
 /**
  * Build the water model surrounding the height map
  */
 SystemOcean.HeightMap.prototype.build = function() {
-    const vertices = new Array(this.values.length * 2);
+    const width = this.heightMap.getWidth() + 2 * this.distanceField.SHORE_LENGTH;
+    const height = this.heightMap.getHeight() + 2 * this.distanceField.SHORE_LENGTH;
+    const xValues = Math.ceil(width / this.RESOLUTION) + 1;
+    const yValues = Math.ceil(height / this.RESOLUTION) + 1;
+    const xStep = width / (xValues - 1);
+    const yStep = height / (yValues - 1);
+    const vertices = new Array(xValues * yValues * 4);
     const indices = [];
 
-    for (let y = 0; y < this.yValues; ++y) for (let x = 0; x < this.xValues; ++x) {
-        const index = (x + y * this.xValues) * 2;
+    for (let y = 0; y < yValues; ++y) for (let x = 0; x < xValues; ++x) {
+        const index = (x + y * xValues) << 2;
 
-        vertices[index] = x * this.resolution;
-        vertices[index + 1] = y * this.resolution;
-    }
+        vertices[index] = x * xStep - this.distanceField.SHORE_LENGTH;
+        vertices[index + 1] = y * yStep - this.distanceField.SHORE_LENGTH;
+        vertices[index + 2] = x / (xValues - 1);
+        vertices[index + 3] = y / (yValues - 1);
 
-    for (let y = 0; y < this.yValues - 1; ++y) for (let x = 0; x < this.xValues - 1; ++x) {
-        const iLeftTop = x + y * this.xValues;
-        const iRightTop = iLeftTop + 1;
-        const iLeftBottom = x + (y + 1) * this.xValues;
-        const iRightBottom = iLeftBottom + 1;
-        const hLeftTop = this.values[iLeftTop];
-        const hRightTop = this.values[iRightTop];
-        const hLeftBottom = this.values[iLeftBottom];
-        const hRightBottom = this.values[iRightBottom];
+        if (x < xValues - 1 && y < yValues - 1) {
+            const iLeftTop = x + y * xValues;
+            const iRightTop = iLeftTop + 1;
+            const iLeftBottom = x + (y + 1) * xValues;
+            const iRightBottom = iLeftBottom + 1;
 
-        // // TODO: Add maximum wave height to height threshold
-        if (hLeftTop > this.waterHeight &&
-            hRightTop > this.waterHeight &&
-            hLeftBottom > this.waterHeight &&
-            hRightBottom > this.waterHeight)
-            continue;
+            const hLeftTop = this.heightMap.sampler.sample(
+                x * xStep - this.distanceField.SHORE_LENGTH,
+                y * yStep - this.distanceField.SHORE_LENGTH);
+            const hRightTop = this.heightMap.sampler.sample(
+                (x + 1) * xStep - this.distanceField.SHORE_LENGTH,
+                y * yStep - this.distanceField.SHORE_LENGTH);
+            const hLeftBottom = this.heightMap.sampler.sample(
+                x * xStep - this.distanceField.SHORE_LENGTH,
+                (y + 1) * yStep - this.distanceField.SHORE_LENGTH);
+            const hRightBottom = this.heightMap.sampler.sample(
+                (x + 1) * xStep - this.distanceField.SHORE_LENGTH,
+                (y + 1) * yStep - this.distanceField.SHORE_LENGTH);
 
-        indices.push(
-            iLeftBottom,
-            iLeftTop,
-            iRightTop,
-            iRightTop,
-            iRightBottom,
-            iLeftBottom);
+            if (hLeftBottom < this.waterHeight ||
+                hLeftTop < this.waterHeight ||
+                hRightTop < this.waterHeight)
+                indices.push(
+                    iLeftBottom,
+                    iLeftTop,
+                    iRightTop);
+
+            if (hRightTop < this.waterHeight ||
+                hRightBottom < this.waterHeight ||
+                hLeftBottom < this.waterHeight)
+                indices.push(
+                    iRightTop,
+                    iRightBottom,
+                    iLeftBottom);
+        }
     }
 
     this.indexCount = indices.length;
@@ -105,9 +114,9 @@ SystemOcean.HeightMap.prototype.build = function() {
  * @param {Shader} shader The active shader
  */
 SystemOcean.HeightMap.prototype.draw = function(shader) {
-    this.gl.uniform2f(shader.uSize, (this.xValues - 1) * this.resolution, (this.yValues - 1) * this.resolution);
     this.gl.uniform1f(shader.uHeight, this.waterHeight);
     this.gl.uniform1i(shader.uDistanceField, 0);
+    this.gl.uniform1f(shader.uShoreLength, this.distanceField.SHORE_LENGTH);
 
     this.gl.activeTexture(this.gl.TEXTURE0);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.distanceField.texture);
@@ -116,7 +125,9 @@ SystemOcean.HeightMap.prototype.draw = function(shader) {
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indices);
 
     this.gl.enableVertexAttribArray(shader.aVertex);
-    this.gl.vertexAttribPointer(shader.aVertex, 2, this.gl.FLOAT, false, 8, 0);
+    this.gl.vertexAttribPointer(shader.aVertex, 2, this.gl.FLOAT, false, 16, 0);
+    this.gl.enableVertexAttribArray(shader.aUv);
+    this.gl.vertexAttribPointer(shader.aUv, 2, this.gl.FLOAT, false, 16, 8);
 
     this.gl.drawElements(this.gl.TRIANGLES, this.indexCount, this.gl.UNSIGNED_INT, 0);
 };

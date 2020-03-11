@@ -1,10 +1,8 @@
 /**
  * A distance field for ocean wave sampling
  * @param {WebGLRenderingContext} gl The WebGL 1 rendering context
- * @param {Number} xValues The number of X values
- * @param {Number} yValues The number of Y values
- * @param {Array} values An array containing all height values
- * @param {Number} resolution The spacing between the values
+ * @param {Number} terrainWidth The terrain width
+ * @param {Number} terrainHeight The terrain height
  * @param {Number} waterHeight The water height
  * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
  * @param {Shader} shaderThreshold The height map threshold shader
@@ -14,29 +12,26 @@
  */
 SystemOcean.DistanceField = function(
     gl,
-    xValues,
-    yValues,
-    values,
-    resolution,
+    terrainWidth,
+    terrainHeight,
     waterHeight,
     terrainHeightMap,
     shaderThreshold,
     shaderVoronoi,
     shaderFinal) {
     this.gl = gl;
-    this.xValues = xValues;
-    this.yValues = yValues;
-    this.width = this.RESOLUTION * (xValues - 1);
-    this.height = this.RESOLUTION * (yValues - 1);
-    this.values = values;
-    this.resolution = resolution;
+    this.terrainWidth = terrainWidth;
+    this.terrainHeight = terrainHeight;
+    this.shoreLengthPixels = this.SHORE_LENGTH * this.RESOLUTION;
+    this.width = Math.round(this.terrainWidth * this.RESOLUTION + this.shoreLengthPixels * 2);
+    this.height = Math.round(this.terrainHeight * this.RESOLUTION + this.shoreLengthPixels * 2);
     this.waterHeight = waterHeight;
     this.terrainHeightMap = terrainHeightMap;
     this.texture = this.build(shaderThreshold, shaderVoronoi, shaderFinal);
 };
 
-SystemOcean.DistanceField.prototype.RESOLUTION = 4;
-SystemOcean.DistanceField.prototype.SHORE_LENGTH = 128;
+SystemOcean.DistanceField.prototype.RESOLUTION = 20;
+SystemOcean.DistanceField.prototype.SHORE_LENGTH = 3;
 
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `
 #version 100
@@ -44,6 +39,7 @@ SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `
 precision mediump float;
 
 uniform vec2 size;
+uniform float shoreLength;
 
 attribute vec3 vertex;
 
@@ -51,7 +47,7 @@ varying vec2 uv;
 varying float y;
 
 void main() {
-  uv = vertex.xz / size;
+  uv = (vertex.xz + vec2(shoreLength)) / (size + vec2(2.0 * shoreLength));
   y = vertex.y;
   gl_Position = vec4(2.0 * uv - vec2(1.0), 0.0, 1.0);
 }
@@ -141,12 +137,12 @@ SystemOcean.DistanceField.prototype.SHADER_FINAL_FRAGMENT = `
 precision mediump float;
 
 uniform sampler2D source;
+uniform float shoreLength;
 uniform vec2 size;
 
 varying vec2 uv;
 
 void main() {
-  float iShoreLength = ` + (1 / SystemOcean.DistanceField.prototype.SHORE_LENGTH) + `;
   vec2 shoreDelta = (texture2D(source, uv).xy - uv) * size;
   float shoreDist = length(shoreDelta);
   vec2 shoreDirection = vec2(0.0);
@@ -154,7 +150,7 @@ void main() {
   if (shoreDist != 0.0)
     shoreDirection = normalize(shoreDelta);
   
-  gl_FragColor = vec4(min(1.0, shoreDist * iShoreLength), shoreDirection * 0.5 + vec2(0.5), 1.0);
+  gl_FragColor = vec4(min(1.0, shoreDist / shoreLength), shoreDirection * 0.5 + vec2(0.5), 1.0);
 }
 `;
 
@@ -179,7 +175,7 @@ SystemOcean.DistanceField.prototype.build = function(
     let step = 1;
     let current = 0;
 
-    while (step < SystemOcean.DistanceField.prototype.SHORE_LENGTH >> 1)
+    while (step < this.shoreLengthPixels * .5)
         step <<= 1;
 
     // Create output texture
@@ -220,11 +216,9 @@ SystemOcean.DistanceField.prototype.build = function(
 
     shaderThreshold.use();
 
-    this.gl.uniform2f(
-        shaderThreshold.uSize,
-        (this.xValues - 1) * this.resolution,
-        (this.yValues - 1) * this.resolution);
+    this.gl.uniform2f(shaderThreshold.uSize, this.terrainWidth, this.terrainHeight);
     this.gl.uniform1f(shaderThreshold.uHeight, this.waterHeight);
+    this.gl.uniform1f(shaderThreshold.uShoreLength, this.SHORE_LENGTH);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.terrainHeightMap.vertices);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.terrainHeightMap.indices);
@@ -269,6 +263,7 @@ SystemOcean.DistanceField.prototype.build = function(
 
     this.gl.uniform1i(shaderFinal.uSource, 0);
     this.gl.uniform2f(shaderFinal.uSize, this.width, this.height);
+    this.gl.uniform1f(shaderFinal.uShoreLength, this.shoreLengthPixels);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, quad);
 
