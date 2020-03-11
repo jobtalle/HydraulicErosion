@@ -36,6 +36,7 @@ SystemOcean.DistanceField = function(
 };
 
 SystemOcean.DistanceField.prototype.RESOLUTION = 4;
+SystemOcean.DistanceField.prototype.SHORE_LENGTH = 128;
 
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `
 #version 100
@@ -70,7 +71,7 @@ void main() {
   if (y > height)
     gl_FragColor = vec4(uv, 0.0, 1.0);
   else
-    gl_FragColor = vec4(0.0);
+    gl_FragColor = vec4(-1.0);
 }
 `;
 
@@ -145,9 +146,15 @@ uniform vec2 size;
 varying vec2 uv;
 
 void main() {
+  float iShoreLength = ` + (1 / SystemOcean.DistanceField.prototype.SHORE_LENGTH) + `;
   vec2 shoreDelta = (texture2D(source, uv).xy - uv) * size;
+  float shoreDist = length(shoreDelta);
+  vec2 shoreDirection = vec2(0.0);
   
-  gl_FragColor = vec4(min(1.0, length(shoreDelta) * 0.01), normalize(shoreDelta) * 0.5 + vec2(0.5), 1.0);
+  if (shoreDist != 0.0)
+    shoreDirection = normalize(shoreDelta);
+  
+  gl_FragColor = vec4(min(1.0, shoreDist * iShoreLength), shoreDirection * 0.5 + vec2(0.5), 1.0);
 }
 `;
 
@@ -172,7 +179,7 @@ SystemOcean.DistanceField.prototype.build = function(
     let step = 1;
     let current = 0;
 
-    while (step < Math.max(this.width, this.height))
+    while (step < SystemOcean.DistanceField.prototype.SHORE_LENGTH >> 1)
         step <<= 1;
 
     // Create output texture

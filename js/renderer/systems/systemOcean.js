@@ -62,7 +62,7 @@ void main() {
 
   gl_FragColor = texture2D(distanceField, uv);
   
-  if (shoreDistance > 0.4 && shoreDistance < 0.8)
+  if (shoreDistance > 0.95 && shoreDistance < 1.0)
     gl_FragColor = vec4(1.0);
 
   if (shoreDistance > 0.05 && shoreDistance < 0.1)
