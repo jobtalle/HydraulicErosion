@@ -40,12 +40,14 @@ SystemOcean.DistanceField.prototype.RESOLUTION = 4;
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `
 #version 100
 
-uniform mediump vec2 size;
+precision mediump float;
 
-attribute mediump vec3 vertex;
+uniform vec2 size;
 
-varying mediump vec2 uv;
-varying mediump float y;
+attribute vec3 vertex;
+
+varying vec2 uv;
+varying float y;
 
 void main() {
   uv = vertex.xz / size;
@@ -57,10 +59,12 @@ void main() {
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_FRAGMENT = `
 #version 100
 
-uniform mediump float height;
+precision mediump float;
 
-varying mediump vec2 uv;
-varying mediump float y;
+uniform float height;
+
+varying vec2 uv;
+varying float y;
 
 void main() {
   if (y > height)
@@ -73,9 +77,11 @@ void main() {
 SystemOcean.DistanceField.prototype.SHADER_VORONOI_VERTEX = `
 #version 100
 
-attribute mediump vec2 vertex;
+precision mediump float;
 
-varying mediump vec2 uv;
+attribute vec2 vertex;
+
+varying vec2 uv;
 
 void main() {
   uv = vertex;
@@ -86,20 +92,22 @@ void main() {
 SystemOcean.DistanceField.prototype.SHADER_VORONOI_FRAGMENT = `
 #version 100
 
+precision mediump float;
+
 uniform sampler2D source;
-uniform mediump vec2 size;
+uniform vec2 size;
 uniform int step;
 
-varying mediump vec2 uv;
+varying vec2 uv;
 
 void main() {
-  lowp float bestDistance = 16000000.0;
-  lowp vec4 bestPixel = vec4(0.0);
+  float bestDistance = 16000000.0;
+  vec4 bestPixel = vec4(0.0);
   
   for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
-    lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
-    lowp vec2 delta = (pixel.xy - uv) * size;
-    lowp float distance = dot(delta, delta);
+    vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
+    vec2 delta = (pixel.xy - uv) * size;
+    float distance = dot(delta, delta);
     
     if (pixel.a != 0.0 && distance < bestDistance) {
       bestDistance = distance;
@@ -114,9 +122,11 @@ void main() {
 SystemOcean.DistanceField.prototype.SHADER_FINAL_VERTEX = `
 #version 100
 
-attribute mediump vec2 vertex;
+precision mediump float;
 
-varying mediump vec2 uv;
+attribute vec2 vertex;
+
+varying vec2 uv;
 
 void main() {
   uv = vertex;
@@ -127,13 +137,15 @@ void main() {
 SystemOcean.DistanceField.prototype.SHADER_FINAL_FRAGMENT = `
 #version 100
 
-uniform sampler2D source;
-uniform mediump vec2 size;
+precision mediump float;
 
-varying mediump vec2 uv;
+uniform sampler2D source;
+uniform vec2 size;
+
+varying vec2 uv;
 
 void main() {
-  mediump vec2 shoreDelta = (texture2D(source, uv).xy - uv) * size;
+  vec2 shoreDelta = (texture2D(source, uv).xy - uv) * size;
   
   gl_FragColor = vec4(min(1.0, length(shoreDelta) * 0.01), normalize(shoreDelta) * 0.5 + vec2(0.5), 1.0);
 }

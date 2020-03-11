@@ -30,13 +30,15 @@ const SystemOcean = function(gl) {
 SystemOcean.prototype.SHADER_VERTEX = `
 #version 100
 
+precision mediump float;
+
 uniform mat4 mvp;
-uniform mediump vec2 size;
-uniform mediump float height;
+uniform vec2 size;
+uniform float height;
 
-attribute mediump vec2 vertex;
+attribute vec2 vertex;
 
-varying lowp vec2 uv;
+varying vec2 uv;
 
 void main() {
   uv = vertex.xy / size;
@@ -48,13 +50,15 @@ void main() {
 SystemOcean.prototype.SHADER_FRAGMENT = `
 #version 100
 
-uniform sampler2D distanceField;
-uniform mediump vec2 size;
+precision mediump float;
 
-varying lowp vec2 uv;
+uniform sampler2D distanceField;
+uniform vec2 size;
+
+varying vec2 uv;
 
 void main() {
-  mediump float shoreDistance = texture2D(distanceField, uv).x;
+  float shoreDistance = texture2D(distanceField, uv).x;
 
   gl_FragColor = texture2D(distanceField, uv);
   
