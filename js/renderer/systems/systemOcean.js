@@ -19,6 +19,12 @@ const SystemOcean = function(gl) {
         SystemOcean.DistanceField.prototype.SHADER_VORONOI_FRAGMENT,
         ["source", "size", "step"],
         ["vertex"]);
+    this.shaderFinal = new Shader(
+        gl,
+        SystemOcean.DistanceField.prototype.SHADER_FINAL_VERTEX,
+        SystemOcean.DistanceField.prototype.SHADER_FINAL_FRAGMENT,
+        ["source", "size"],
+        ["vertex"]);
 };
 
 SystemOcean.prototype.SHADER_VERTEX = `
@@ -27,22 +33,15 @@ SystemOcean.prototype.SHADER_VERTEX = `
 uniform mat4 mvp;
 uniform mediump vec2 size;
 uniform mediump float height;
-uniform sampler2D distanceField;
 
 attribute mediump vec2 vertex;
 
 varying lowp vec2 uv;
-varying lowp float shoreDistance;
 
 void main() {
   uv = vertex.xy / size;
   
-  mediump float waveHeight = height;
-  
-  // if (shoreDistance > 0.4 && shoreDistance < 0.8)
-  //   waveHeight += .3 * (0.5 - 0.5 * cos(6.283185 * (shoreDistance - 0.4) / 0.4));
-  
-  gl_Position = mvp * vec4(vertex.x, waveHeight, vertex.y, 1.0);
+  gl_Position = mvp * vec4(vertex.x, height, vertex.y, 1.0);
 }
 `;
 
@@ -53,14 +52,16 @@ uniform sampler2D distanceField;
 uniform mediump vec2 size;
 
 varying lowp vec2 uv;
-varying lowp float shoreDistance;
 
 void main() {
-  mediump float shoreDistance = length((texture2D(distanceField, uv).xy - uv) * size);
+  mediump float shoreDistance = texture2D(distanceField, uv).x;
 
   gl_FragColor = texture2D(distanceField, uv);
   
   if (shoreDistance > 0.4 && shoreDistance < 0.8)
+    gl_FragColor = vec4(1.0);
+
+  if (shoreDistance > 0.05 && shoreDistance < 0.1)
     gl_FragColor = vec4(1.0);
 }
 `;
@@ -92,7 +93,8 @@ SystemOcean.prototype.makeHeightMap = function(
         terrainHeightMap,
         height,
         this.shaderThreshold,
-        this.shaderVoronoi);
+        this.shaderVoronoi,
+        this.shaderFinal);
 };
 
 /**

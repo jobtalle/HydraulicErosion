@@ -9,6 +9,7 @@
  * @param {SystemTerrain.HeightMap} terrainHeightMap The terrain height map
  * @param {Shader} shaderThreshold The height map threshold shader
  * @param {Shader} shaderVoronoi The voronoi shader
+ * @param {Shader} shaderFinal The final distance field shader
  * @constructor
  */
 SystemOcean.DistanceField = function(
@@ -20,7 +21,8 @@ SystemOcean.DistanceField = function(
     waterHeight,
     terrainHeightMap,
     shaderThreshold,
-    shaderVoronoi) {
+    shaderVoronoi,
+    shaderFinal) {
     this.gl = gl;
     this.xValues = xValues;
     this.yValues = yValues;
@@ -30,10 +32,10 @@ SystemOcean.DistanceField = function(
     this.resolution = resolution;
     this.waterHeight = waterHeight;
     this.terrainHeightMap = terrainHeightMap;
-    this.texture = this.build(shaderThreshold, shaderVoronoi);
+    this.texture = this.build(shaderThreshold, shaderVoronoi, shaderFinal);
 };
 
-SystemOcean.DistanceField.prototype.RESOLUTION = 8;
+SystemOcean.DistanceField.prototype.RESOLUTION = 4;
 
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `
 #version 100
@@ -96,7 +98,7 @@ void main() {
   
   for (int y = -1; y < 2; ++y) for (int x = -1; x < 2; ++x) {
     lowp vec4 pixel = texture2D(source, uv + vec2(float(x), float(y)) * float(step) / size);
-    lowp vec2 delta = (pixel.xy - uv);
+    lowp vec2 delta = (pixel.xy - uv) * size;
     lowp float distance = dot(delta, delta);
     
     if (pixel.a != 0.0 && distance < bestDistance) {
@@ -109,13 +111,47 @@ void main() {
 }
 `;
 
+SystemOcean.DistanceField.prototype.SHADER_FINAL_VERTEX = `
+#version 100
+
+attribute mediump vec2 vertex;
+
+varying mediump vec2 uv;
+
+void main() {
+  uv = vertex;
+  gl_Position = vec4(2.0 * uv - vec2(1.0), 0.0, 1.0);
+}
+`;
+
+SystemOcean.DistanceField.prototype.SHADER_FINAL_FRAGMENT = `
+#version 100
+
+uniform sampler2D source;
+uniform mediump vec2 size;
+
+varying mediump vec2 uv;
+
+void main() {
+  mediump vec2 shoreDelta = (texture2D(source, uv).xy - uv) * size;
+  
+  gl_FragColor = vec4(min(1.0, length(shoreDelta) * 0.01), normalize(shoreDelta) * 0.5 + vec2(0.5), 1.0);
+}
+`;
+
 /**
  * Build the distance field
  * @param {Shader} shaderThreshold The height map threshold shader
  * @param {Shader} shaderVoronoi The voronoi shader
+ * @param {Shader} shaderFinal The final distance field shader
  * @returns {WebGLTexture} The distance field texture
  */
-SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoronoi) {
+SystemOcean.DistanceField.prototype.build = function(
+    shaderThreshold,
+    shaderVoronoi,
+    shaderFinal) {
+    const texture = this.gl.createTexture();
+    const framebuffer = this.gl.createFramebuffer();
     const quad = this.gl.createBuffer();
     const pairs = [
         this.createTexturePair(this.width, this.height),
@@ -127,12 +163,39 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
     while (step < Math.max(this.width, this.height))
         step <<= 1;
 
+    // Create output texture
+    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+    this.gl.texImage2D(
+        this.gl.TEXTURE_2D,
+        0,
+        this.gl.RGBA,
+        this.width,
+        this.height,
+        0,
+        this.gl.RGBA,
+        this.gl.UNSIGNED_BYTE,
+        null);
+
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer);
+    this.gl.framebufferTexture2D(
+        this.gl.FRAMEBUFFER,
+        this.gl.COLOR_ATTACHMENT0,
+        this.gl.TEXTURE_2D,
+        texture,
+        0);
+
+    // Upload a quad
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, quad);
     this.gl.bufferData(
         this.gl.ARRAY_BUFFER,
         new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]),
         this.gl.STATIC_DRAW);
 
+    // Blit the terrain shape onto the current buffer
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, pairs[current].framebuffer);
     this.gl.viewport(0, 0, this.width, this.height);
 
@@ -155,6 +218,7 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
 
     this.gl.drawElements(this.gl.TRIANGLES, this.terrainHeightMap.indexCount, this.gl.UNSIGNED_INT, 0);
 
+    // Create the voronoi diagram
     shaderVoronoi.use();
 
     this.gl.uniform1i(shaderVoronoi.uSource, 0);
@@ -181,15 +245,33 @@ SystemOcean.DistanceField.prototype.build = function(shaderThreshold, shaderVoro
         step >>= 1;
     }
 
-    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    // Blit final texture
+    shaderFinal.use();
 
+    this.gl.uniform1i(shaderFinal.uSource, 0);
+    this.gl.uniform2f(shaderFinal.uSize, this.width, this.height);
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, quad);
+
+    this.gl.enableVertexAttribArray(shaderFinal.aVertex);
+    this.gl.vertexAttribPointer(shaderFinal.aVertex, 2, this.gl.FLOAT, false, 8, 0);
+
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, framebuffer);
+    this.gl.viewport(0, 0, this.width, this.height);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, pairs[current].texture);
+
+    this.gl.drawArrays(this.gl.TRIANGLE_FAN, 0, 4);
+
+    // Free memory
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    this.gl.deleteFramebuffer(framebuffer);
     this.gl.deleteFramebuffer(pairs[current].framebuffer);
     this.gl.deleteFramebuffer(pairs[1 - current].framebuffer);
+    this.gl.deleteTexture(pairs[current].texture);
     this.gl.deleteTexture(pairs[1 - current].texture);
-
     this.gl.deleteBuffer(quad);
 
-    return pairs[current].texture;
+    return texture;
 };
 
 /**
@@ -216,8 +298,8 @@ SystemOcean.DistanceField.prototype.createTexturePair = function(width, height) 
         this.height,
         0,
         this.gl.RGBA,
-        this.gl.UNSIGNED_BYTE,
-        new Uint8Array(width * height << 2));
+        this.gl.FLOAT,
+        null);
 
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, pair.framebuffer);
     this.gl.framebufferTexture2D(

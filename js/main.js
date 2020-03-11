@@ -47,7 +47,6 @@ window.onmousedown = event => {
         archipelago.mousePress(event.clientX, event.clientY);
 };
 window.onmouseup = () => {
-    if (event.button === 0)
         archipelago.mouseRelease();
 };
 

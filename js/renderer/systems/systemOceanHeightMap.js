@@ -10,6 +10,7 @@
  * @param {Number} waterHeight The water height
  * @param {Shader} shaderThreshold The height map threshold shader
  * @param {Shader} shaderVoronoi The voronoi shader
+ * @param {Shader} shaderFinal The final distance field shader
  * @constructor
  */
 SystemOcean.HeightMap = function(
@@ -22,7 +23,8 @@ SystemOcean.HeightMap = function(
     terrainHeightMap,
     waterHeight,
     shaderThreshold,
-    shaderVoronoi) {
+    shaderVoronoi,
+    shaderFinal) {
     this.container = container;
     this.gl = gl;
     this.xValues = xValues;
@@ -44,7 +46,8 @@ SystemOcean.HeightMap = function(
         waterHeight,
         terrainHeightMap,
         shaderThreshold,
-        shaderVoronoi);
+        shaderVoronoi,
+        shaderFinal);
 
     this.container.push(this);
 };
