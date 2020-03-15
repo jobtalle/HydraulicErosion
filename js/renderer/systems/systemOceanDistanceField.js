@@ -30,7 +30,7 @@ SystemOcean.DistanceField = function(
     this.texture = this.build(shaderThreshold, shaderVoronoi, shaderFinal);
 };
 
-SystemOcean.DistanceField.prototype.RESOLUTION = 20;
+SystemOcean.DistanceField.prototype.RESOLUTION = 24;
 SystemOcean.DistanceField.prototype.SHORE_LENGTH = 3;
 
 SystemOcean.DistanceField.prototype.SHADER_THRESHOLD_VERTEX = `

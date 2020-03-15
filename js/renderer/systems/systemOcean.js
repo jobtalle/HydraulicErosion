@@ -28,6 +28,10 @@ const SystemOcean = function(gl) {
         ["vertex"]);
 };
 
+SystemOcean.prototype.SHADER_HEIGHT = `
+  float wave = 0.5 + 0.5 * cos(4.0 * (pow(shoreDistance, 0.65) + phase) * 6.283185);
+`;
+
 SystemOcean.prototype.SHADER_VERTEX = `
 #version 100
 
@@ -35,16 +39,26 @@ precision mediump float;
 
 uniform mat4 mvp;
 uniform float height;
+uniform sampler2D distanceField;
+uniform float phase;
 
 attribute vec2 vertex;
 attribute vec2 uv;
 
 varying vec2 iUv;
+varying float a;
 
 void main() {
+  float shoreDistance = texture2D(distanceField, uv).x;
+  float s = 1.2;
+  a = 0.5 + 0.5 * cos(uv.x * 20.0 * s) * sin(uv.y * 40.0 * s + phase * 6.283185);
+` + SystemOcean.prototype.SHADER_HEIGHT + `
+
   iUv = uv;
   
-  gl_Position = mvp * vec4(vertex.x, height, vertex.y, 1.0);
+  float waveHeight = 0.1 * pow(wave, 2.0) * (1.0 - shoreDistance) * (1.0 - a);
+  
+  gl_Position = mvp * vec4(vertex.x, height + waveHeight, vertex.y, 1.0);
 }
 `;
 
@@ -58,14 +72,16 @@ uniform vec2 size;
 uniform float phase;
 
 varying vec2 iUv;
+varying float a;
 
 void main() {
   float shoreDistance = texture2D(distanceField, iUv).x;
+` + SystemOcean.prototype.SHADER_HEIGHT + `
 
-  gl_FragColor = vec4(texture2D(distanceField, iUv).rgb, 0.5);
+  gl_FragColor = vec4(0.4, 0.4, 0.6, 0.7);
   
-  if (shoreDistance > (1.0 - phase) && shoreDistance < min(0.999999, (1.0 - phase) + 0.05))
-    gl_FragColor = vec4(1.0);
+  if (shoreDistance < 0.03 || shoreDistance != 1.0 && wave > 0.75 + a * 0.4)
+    gl_FragColor.rgb += vec3(pow(1.0 - shoreDistance, 2.5));
 }
 `;
 
@@ -104,7 +120,7 @@ SystemOcean.prototype.makeHeightMap = function(
  * @param {Number} timeStep Passed time in seconds
  */
 SystemOcean.prototype.update = function(timeStep) {
-    this.phase += timeStep * .1;
+    this.phase += timeStep * .08;
 
     if (this.phase > 1)
         --this.phase;

@@ -82,18 +82,19 @@ SystemOcean.HeightMap.prototype.build = function() {
             const hRightBottom = this.heightMap.sampler.sample(
                 (x + 1) * xStep - this.distanceField.SHORE_LENGTH,
                 (y + 1) * yStep - this.distanceField.SHORE_LENGTH);
+            const height = this.waterHeight + 0.1; // TODO: Added max wave height
 
-            if (hLeftBottom < this.waterHeight ||
-                hLeftTop < this.waterHeight ||
-                hRightTop < this.waterHeight)
+            if (hLeftBottom < height ||
+                hLeftTop < height ||
+                hRightTop < height)
                 indices.push(
                     iLeftBottom,
                     iLeftTop,
                     iRightTop);
 
-            if (hRightTop < this.waterHeight ||
-                hRightBottom < this.waterHeight ||
-                hLeftBottom < this.waterHeight)
+            if (hRightTop < height ||
+                hRightBottom < height ||
+                hLeftBottom < height)
                 indices.push(
                     iRightTop,
                     iRightBottom,
