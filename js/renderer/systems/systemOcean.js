@@ -51,7 +51,7 @@ varying float a;
 void main() {
   float shoreDistance = texture2D(distanceField, uv).x;
   float s = 1.2;
-  a = 0.5 + 0.5 * cos(uv.x * 20.0 * s) * sin(uv.y * 40.0 * s + phase * 6.283185);
+  a = 0.5 + 0.5 * cos(uv.x * 20.0 * s) * sin(uv.y * 40.0 * s);
 ` + SystemOcean.prototype.SHADER_HEIGHT + `
 
   iUv = uv;
@@ -78,7 +78,7 @@ void main() {
   float shoreDistance = texture2D(distanceField, iUv).x;
 ` + SystemOcean.prototype.SHADER_HEIGHT + `
 
-  gl_FragColor = vec4(0.4, 0.4, 0.6, 0.7);
+  gl_FragColor = vec4(0.2, 0.4, 0.6, 1.0);
   
   if (shoreDistance < 0.03 || shoreDistance != 1.0 && wave > 0.75 + a * 0.4)
     gl_FragColor.rgb += vec3(pow(1.0 - shoreDistance, 2.5));

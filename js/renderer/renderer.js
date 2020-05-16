@@ -63,7 +63,7 @@ Renderer.prototype.draw = function() {
 Renderer.prototype.setup = function() {
     this.gl.getExtension("OES_element_index_uint");
     this.gl.getExtension("OES_texture_float");
-    this.gl.clearColor(.3, .3, .35, 1);
+    this.gl.clearColor(0.2, 0.4, 0.6, 1.0);
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
 };
