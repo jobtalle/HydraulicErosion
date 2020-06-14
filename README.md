@@ -1,6 +1,6 @@
-# Bounty islands
-[Works in your browser!](https://jobtalle.com/SketchBounty/)
+# Hydraulic erosion
+[Works in your browser!](https://jobtalle.com/HydraulicErosion/)
 
-Visit [my website](https://jobtalle.com/sketches.html) for more sketches.
+Visit [my blog](https://jobtalle.com/simulating_hydraulic_erosion.html) for an in depth explanation.
 
 ![alt text](preview.png "Island")
